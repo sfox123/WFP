@@ -1,0 +1,21 @@
+.mt-2 {
+  margin-top: 2rem !important;
+}
+
+.loginBox {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10rem;
+}
+.link {
+  text-decoration: none;
+  color: inherit;
+}
+.center {
+  align-self: center;
+}
+.svg_icons {
+  transform: scale(1.8);
+}
