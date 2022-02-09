@@ -1,5 +1,6 @@
 import { combineReducers } from "redux";
 import fetchReducer from "./fetchReducer";
+import HistoryReducer from "./HistoryReducer";
 
 const USER_STATE = {
   userName: null,
@@ -9,6 +10,11 @@ const USER_STATE = {
 const PASS_STATE = {
   loggedIn: false,
   passError: false,
+};
+
+const SNACK = {
+  snackOpen: false,
+  snackMessage: null,
 };
 
 const userReducer = () => {
@@ -49,10 +55,42 @@ const fetchBioMetricReducer = (state = [], action) => {
   }
 };
 
+const loaderReducer = (state = false, action) => {
+  switch (action.type) {
+    case "TOGGLE_LOADER":
+      return action.payload;
+    default:
+      return state;
+  }
+};
+
+const snackReducer = (state = SNACK, action) => {
+  switch (action.type) {
+    case "SNACK_SWITCH":
+      return action.payload;
+    default:
+      return state;
+  }
+};
+
+const foundUserReducer = (state = null, action) => {
+  switch (action.type) {
+    case "FETCH_USER":
+      return action.payload;
+
+    default:
+      return state;
+  }
+};
+
 export default combineReducers({
   user: userReducer,
   currentUser: loggedUserReducer,
   fetchData: fetchReducer,
   loggedIn: loggedInReducer,
   bioMetric: fetchBioMetricReducer,
+  loader: loaderReducer,
+  openSnack: snackReducer,
+  foundUser: foundUserReducer,
+  history: HistoryReducer,
 });

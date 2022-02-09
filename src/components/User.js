@@ -12,10 +12,10 @@ import Checkbox from "@mui/material/Checkbox";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
+import TextField from "@mui/material/TextField";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ListItem from "@mui/material/ListItem";
@@ -25,12 +25,17 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import Button from "@mui/material/Button";
 import Fingerprint from "@mui/icons-material/Fingerprint";
-import LoadingButton from "@mui/lab/LoadingButton";
+import CircularProgress from "@mui/material/CircularProgress";
+import Backdrop from "@mui/material/Backdrop";
+import FormControl from "@mui/material/FormControl";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
-import { fetchBio } from "../actions";
-
+import { matchScore, toggleLoader, toggleSnack } from "../actions";
+import NewUser from "./views/NewUser";
+import History from "./views/History";
 import "../style.css";
 
 const drawerWidth = 240;
@@ -43,7 +48,9 @@ const openedMixin = (theme) => ({
   }),
   overflowX: "hidden",
 });
-
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 const closedMixin = (theme) => ({
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
@@ -117,18 +124,27 @@ const names = [
   "MOUSE",
   "WIFI ROUTER",
 ];
-const User = ({ fetchBM, bioMetric }) => {
+const User = ({
+  loader,
+  fetchBM,
+  handleSnack,
+  handleToggle,
+  openSnack,
+  history,
+}) => {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [personName, setPersonName] = React.useState([]);
+  const [selectIndex, setSelectIndex] = React.useState(0);
+  const [remarks, setRemarks] = React.useState("");
   const provideHistory = useHistory();
 
   const handleDrawerOpen = () => {
     setOpen(true);
   };
   const handleBio = () => {
-    fetchBM();
-    console.log(bioMetric);
+    fetchBM(personName, remarks);
+    setPersonName([]);
   };
   const handleLogout = () => {
     window.localStorage.setItem("loggedUser", false);
@@ -137,6 +153,13 @@ const User = ({ fetchBM, bioMetric }) => {
 
   const handleDrawerClose = () => {
     setOpen(false);
+  };
+  const handleRemarks = (e) => {
+    setRemarks(e.target.value);
+  };
+
+  const handleSelect = (e) => {
+    setSelectIndex(e);
   };
   const handleChange = (event) => {
     const {
@@ -147,8 +170,41 @@ const User = ({ fetchBM, bioMetric }) => {
       typeof value === "string" ? value.split(",") : value
     );
   };
+  const { snackOpen, snackMessage } = openSnack;
+
+  const handleClose = () => {
+    handleToggle(false);
+  };
+  const handleCloseSnack = () => {
+    const SNACK = {
+      snackOpen: false,
+      snackMessage: null,
+    };
+    handleSnack(SNACK);
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loader}
+        onClick={handleClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Snackbar
+        open={snackOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnack}
+      >
+        <Alert
+          onClose={handleCloseSnack}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          {snackMessage}
+        </Alert>
+      </Snackbar>
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>
@@ -165,7 +221,15 @@ const User = ({ fetchBM, bioMetric }) => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Inventory Management
+            {selectIndex === 0
+              ? "Inventory Management"
+              : selectIndex === 1
+              ? "Pending Items"
+              : selectIndex === 2
+              ? "History"
+              : selectIndex === 3
+              ? "Add User"
+              : null}
           </Typography>
 
           <Button onClick={handleLogout} sx={{ ml: "auto" }} color="inherit">
@@ -185,69 +249,96 @@ const User = ({ fetchBM, bioMetric }) => {
         </DrawerHeader>
         <Divider />
         <List>
-          {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
+          {["Inventory Management", "Pending Items", "History", "Add User"].map(
+            (text, index) => (
+              <ListItem
+                id={index}
+                selected={index === selectIndex ? true : false}
+                onClick={() => {
+                  handleSelect(index);
+                }}
+                button
+                key={text}
+              >
+                <ListItemIcon>
+                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                </ListItemIcon>
+                <ListItemText primary={text} />
+              </ListItem>
+            )
+          )}
         </List>
         <Divider />
-        <List>
-          {["All mail", "Trash", "Spam"].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
       </Drawer>
-      <Box className="loginBox" component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <div>
-          <FormControl sx={{ m: 1, width: 300 }}>
-            <InputLabel id="demo-multiple-checkbox-label">ITEM</InputLabel>
-            <Select
-              labelId="demo-multiple-checkbox-label"
-              id="demo-multiple-checkbox"
-              multiple
-              value={personName}
-              onChange={handleChange}
-              input={<OutlinedInput label="Tag" />}
-              renderValue={(selected) => selected.join(", ")}
-              MenuProps={MenuProps}
+      {selectIndex === 0 && (
+        <Box className="loginBox" component="main" sx={{ flexGrow: 1, p: 3 }}>
+          <div>
+            <FormControl sx={{ m: 1, width: 300 }}>
+              <InputLabel id="demo-multiple-checkbox-label">ITEM</InputLabel>
+              <Select
+                labelId="demo-multiple-checkbox-label"
+                id="demo-multiple-checkbox"
+                multiple
+                value={personName}
+                onChange={handleChange}
+                input={<OutlinedInput label="Tag" />}
+                renderValue={(selected) => selected.join(", ")}
+                MenuProps={MenuProps}
+              >
+                {names.map((name) => (
+                  <MenuItem key={name} value={name}>
+                    <Checkbox checked={personName.indexOf(name) > -1} />
+                    <ListItemText primary={name} />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </div>
+          <div>
+            <FormControl sx={{ mt: 2, mb: 2, width: 300 }}>
+              <TextField
+                sx={{ width: "35ch" }}
+                label="Remarks"
+                // placeholder="Remarks"
+                value={remarks}
+                id="filled-size-normal"
+                variant="filled"
+                onChange={handleRemarks}
+              />
+            </FormControl>
+          </div>
+          <div>
+            <IconButton
+              onClick={handleBio}
+              disabled={personName.length === 0 ? true : false}
+              sx={{ mt: 3 }}
+              className="svg_icons"
+              aria-label="fingerprint"
+              color="success"
             >
-              {names.map((name) => (
-                <MenuItem key={name} value={name}>
-                  <Checkbox checked={personName.indexOf(name) > -1} />
-                  <ListItemText primary={name} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </div>
-        <div>
-          <IconButton
-            onClick={handleBio}
-            disabled={personName.length === 0 ? true : false}
-            sx={{ mt: 3 }}
-            className="svg_icons"
-            aria-label="fingerprint"
-            color="success"
-          >
-            <Fingerprint />
-          </IconButton>
-        </div>
-      </Box>
+              <Fingerprint />
+            </IconButton>
+          </div>
+        </Box>
+      )}
+      {selectIndex === 1 && <NewUser />}
+      {selectIndex === 2 && <History />}
     </Box>
   );
 };
 
 const mapStateToProps = (state) => {
-  return { logged: state.loggedIn.loggedIn, bioMetric: state.bioMetric };
+  return {
+    logged: state.loggedIn.loggedIn,
+    bioMetric: state.bioMetric,
+    openSnack: state.openSnack,
+    loader: state.loader,
+    history: state.history,
+  };
 };
 
-export default connect(mapStateToProps, { fetchBM: fetchBio })(User);
+export default connect(mapStateToProps, {
+  fetchBM: matchScore,
+  handleToggle: toggleLoader,
+  handleSnack: toggleSnack,
+})(User);

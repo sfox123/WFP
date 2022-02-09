@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Login from "./Login";
 import Nav from "./Nav";
 import User from "./User";
@@ -6,8 +6,13 @@ import Protected from "../routes/Protected";
 
 import { BrowserRouter, Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
+import { getHistory } from "../actions";
 
-const App = ({ loggedIn }) => {
+const App = ({ loggedIn, fetchHistory }) => {
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
   return (
     <div>
       <BrowserRouter>
@@ -25,4 +30,4 @@ const mapStateToProps = (state) => {
   return state;
 };
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps, { fetchHistory: getHistory })(App);
