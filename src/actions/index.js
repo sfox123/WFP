@@ -43,7 +43,6 @@ export const fetchUser = () => async (dispatch, getState) => {
     const response = await axios.post("/wfp/getUser", { id });
     await dispatch({ type: "FETCH_API", payload: response.data });
     await dispatch(loggedIn(true));
-    dispatch({ type: "" });
   } catch (error) {}
 };
 
@@ -164,4 +163,16 @@ const getMatch =
 export const getHistory = () => async (dispatch, getState) => {
   const response = await axios.get("/wfp/getHistory");
   dispatch({ type: "FETCH_HISTORY", payload: response.data });
+};
+
+export const updateHistory = (list, author) => async (dispatch, getState) => {
+  dispatch(toggleLoader(true));
+  const response = await axios.post("/wfp/updateHistory", { list, author });
+
+  const SNACK = {
+    snackOpen: true,
+    snackMessage: response.data,
+  };
+  dispatch(toggleSnack(SNACK));
+  dispatch(toggleLoader(false));
 };

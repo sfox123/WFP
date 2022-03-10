@@ -224,11 +224,11 @@ const User = ({
             {selectIndex === 0
               ? "Inventory Management"
               : selectIndex === 1
-              ? "Pending Items"
-              : selectIndex === 2
-              ? "History"
-              : selectIndex === 3
               ? "Add User"
+              : selectIndex === 2
+              ? "Pending Items"
+              : selectIndex === 3
+              ? "History"
               : null}
           </Typography>
 
@@ -249,7 +249,7 @@ const User = ({
         </DrawerHeader>
         <Divider />
         <List>
-          {["Inventory Management", "Pending Items", "History", "Add User"].map(
+          {["Inventory Management", "Add User", "Pending Items", "History"].map(
             (text, index) => (
               <ListItem
                 id={index}
@@ -299,7 +299,6 @@ const User = ({
               <TextField
                 sx={{ width: "35ch" }}
                 label="Remarks"
-                // placeholder="Remarks"
                 value={remarks}
                 id="filled-size-normal"
                 variant="filled"

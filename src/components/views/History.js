@@ -14,6 +14,8 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { blue } from "@mui/material/colors";
 import { connect } from "react-redux";
 
+import { getHistory, updateHistory } from "../../actions";
+
 const columns = [
   { field: "staff", headerName: "Staff Name", width: 230 },
   { field: "itemName", headerName: "ITEMS", width: 380 },
@@ -26,7 +28,6 @@ const columns = [
     valueGetter: (params) => `${params.row.date.substr(0, 16)}`,
   },
 ];
-const emails = ["username@gmail.com", "user02@gmail.com"];
 
 function SimpleDialog(props) {
   const { onClose, selectedValue, open, remarks } = props;
@@ -74,13 +75,15 @@ SimpleDialog.propTypes = {
   remarks: PropTypes.string.isRequired,
 };
 
-const History = ({ history }) => {
+const History = ({ history, fetchHistory, user, fetchUpdate }) => {
   const [rows, setRows] = useState([]);
   const [open, setOpen] = React.useState(false);
   const [remarks, setRemarks] = React.useState("");
   const [selectedValue, setSelectedValue] = React.useState([]);
+  const [checkBox, setCheckBox] = React.useState([]);
 
   useEffect(() => {
+    fetchHistory();
     history.map((x, i) => {
       if (x.pending === false) {
         history.splice(i, 1);
@@ -90,16 +93,31 @@ const History = ({ history }) => {
     });
     setRows(history);
   }, []);
+
   const handleRowClick = (e) => {
     setRemarks(e.row.remarks);
     setSelectedValue(e.row.itemName);
   };
+
   const handleClose = (value) => {
     setOpen(false);
     setSelectedValue(value);
   };
+
   const handleOpen = () => {
     setOpen(true);
+  };
+
+  const handleSelectionRemove = (e) => {
+    setCheckBox(e);
+  };
+
+  const handleClick = () => {
+    let arrId = [];
+    checkBox.map((x, i) => {
+      arrId.push(history[x]._id);
+    });
+    fetchUpdate(arrId, user.name);
   };
 
   return (
@@ -109,9 +127,10 @@ const History = ({ history }) => {
           sx={{ width: "75rem" }}
           rows={rows}
           columns={columns}
-          pageSize={2}
+          pageSize={10}
           rowsPerPageOptions={[10]}
           checkboxSelection
+          onSelectionModelChange={handleSelectionRemove}
           onRowClick={handleRowClick}
           onRowDoubleClick={handleOpen}
         />
@@ -123,7 +142,13 @@ const History = ({ history }) => {
         />
       </div>
       <div>
-        <Button variant="contained" color="primary">
+        <Button
+          onClick={handleClick}
+          disabled={checkBox.length === 0 ? true : false}
+          sx={{ mt: 3, ml: 9 }}
+          variant="contained"
+          color="success"
+        >
           Recieved
         </Button>
       </div>
@@ -132,7 +157,10 @@ const History = ({ history }) => {
 };
 
 const mapStateToProps = (state) => {
-  return { history: state.history };
+  return { history: state.history, user: state.fetchData };
 };
 
-export default connect(mapStateToProps)(History);
+export default connect(mapStateToProps, {
+  fetchHistory: getHistory,
+  fetchUpdate: updateHistory,
+})(History);
