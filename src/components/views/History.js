@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
 import PropTypes from "prop-types";
@@ -15,19 +15,8 @@ import { blue } from "@mui/material/colors";
 import { connect } from "react-redux";
 
 import { getHistory, updateHistory, toggleLoader } from "../../actions";
-
-const columns = [
-  { field: "staff", headerName: "Staff Name", width: 230 },
-  { field: "itemName", headerName: "ITEMS", width: 380 },
-  { field: "assignedBy", headerName: "Assigned By", width: 230 },
-  {
-    field: "date",
-    headerName: "Date",
-    type: "number",
-    width: 130,
-    valueGetter: (params) => `${params.row.date.substr(0, 16)}`,
-  },
-];
+import Modal from "../Modal";
+import Snack from "../Snack";
 
 function SimpleDialog(props) {
   const { onClose, selectedValue, open, remarks } = props;
@@ -75,100 +64,104 @@ SimpleDialog.propTypes = {
   remarks: PropTypes.string.isRequired,
 };
 
-const History = ({
-  loader,
-  history,
-  fetchHistory,
-  user,
-  fetchUpdate,
-  setLoad,
-}) => {
-  const [rows, setRows] = useState([]);
-  const [open, setOpen] = React.useState(false);
-  const [remarks, setRemarks] = React.useState("");
-  const [selectedValue, setSelectedValue] = React.useState([]);
-  const [checkBox, setCheckBox] = React.useState([]);
+class History extends React.Component {
+  state = {
+    rows: [],
+    open: false,
+    remarks: "",
+    selectedValue: [],
+    checkBox: [],
+    columns: [
+      { field: "staff", headerName: "Staff Name", width: 230 },
+      { field: "itemName", headerName: "ITEMS", width: 380 },
+      { field: "assignedBy", headerName: "Assigned By", width: 230 },
+      {
+        field: "date",
+        headerName: "Date",
+        type: "number",
+        width: 130,
+        valueGetter: (params) => `${params.row.date.substr(0, 16)}`,
+      },
+    ],
+  };
 
-  useEffect(() => {
-    // fetchHistory();
-    let tmp = [...history];
+  componentDidMount() {
+    this.props.fetchHistory();
+    let tmp = [...this.props.history];
     tmp.map((x, i) => {
       x.id = i;
     });
     tmp = tmp.filter((item) => item.pending === true);
-    setRows(tmp);
-  }, [loader]);
+    this.setState({ rows: tmp });
+    console.log("running");
+  }
 
-  const handleRowClick = (e) => {
-    setRemarks(e.row.remarks);
-    setSelectedValue(e.row.itemName);
+  handleRowClick = (e) => {
+    this.setState({ remarks: e.row.remarks, selectedValue: e.row.itemName });
   };
 
-  const handleClose = (value) => {
-    setOpen(false);
-    setSelectedValue(value);
+  handleClose = (value) => {
+    this.setState({ open: false, selectedValue: value });
   };
 
-  const handleOpen = () => {
-    setOpen(true);
+  handleOpen = () => {
+    this.setState({ open: true });
   };
 
-  React.useLayoutEffect(() => {
-    fetchHistory();
-  }, [rows]);
-
-  const handleSelectionRemove = (e) => {
-    setCheckBox(e);
+  handleSelectionRemove = (e) => {
+    this.setState({ checkBox: e });
+  };
+  handleModal = () => {
+    this.props.setLoad(false);
   };
   //btn click
-  const handleClick = () => {
-    setLoad(true);
-    let tmp = [...rows];
+  handleClick = () => {
     let arrId = [];
-    checkBox.map((x, i) => {
-      arrId.push(history[x]._id);
-      tmp = tmp.filter((item) => !checkBox.includes(item.id));
+    this.state.checkBox.map((x, i) => {
+      arrId.push(this.props.history[x]._id);
     });
-    fetchUpdate(arrId, user.name);
-    setLoad(false);
-    setRows(tmp);
+    this.props.fetchUpdate(arrId, this.props.user.name);
+    this.componentDidMount();
   };
-
-  return (
-    <Box>
-      <div className="tableBox" style={{ height: 400 }}>
-        <DataGrid
-          sx={{ width: "75rem" }}
-          rows={rows}
-          columns={columns}
-          pageSize={10}
-          rowsPerPageOptions={[10]}
-          checkboxSelection
-          onSelectionModelChange={handleSelectionRemove}
-          onRowClick={handleRowClick}
-          onRowDoubleClick={handleOpen}
-        />
-        <SimpleDialog
-          open={open}
-          selectedValue={selectedValue}
-          onClose={handleClose}
-          remarks={remarks}
-        />
-      </div>
-      <div>
-        <Button
-          onClick={handleClick}
-          disabled={checkBox.length === 0 ? true : false}
-          sx={{ mt: 3, ml: 9 }}
-          variant="contained"
-          color="success"
-        >
-          Recieved
-        </Button>
-      </div>
-    </Box>
-  );
-};
+  render() {
+    return (
+      <Box>
+        <Modal handleClose={this.handleModal} loader={this.props.loader} />
+        <Snack />
+        <div className="tableBox" style={{ height: 400 }}>
+          <DataGrid
+            sx={{ width: "75rem" }}
+            rows={this.state.rows}
+            columns={this.state.columns}
+            pageSize={10}
+            rowsPerPageOptions={[10]}
+            checkboxSelection
+            onSelectionModelChange={this.handleSelectionRemove}
+            onRowClick={this.handleRowClick}
+            onRowDoubleClick={this.handleOpen}
+          />
+          <SimpleDialog
+            open={this.state.open}
+            selectedValue={this.state.selectedValue}
+            onClose={this.handleClose}
+            remarks={this.state.remarks}
+          />
+        </div>
+        <div>
+          <Button
+            onClick={this.handleClick}
+            disabled={this.state.checkBox.length === 0 ? true : false}
+            sx={{ mt: 3, ml: 9 }}
+            variant="contained"
+            color="success"
+          >
+            Recieved
+          </Button>
+        </div>
+      </Box>
+    );
+  }
+}
 
 const mapStateToProps = (state) => {
   return {

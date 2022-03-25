@@ -38,6 +38,8 @@ import NewUser from "./views/NewUser";
 import History from "./views/History";
 import "../style.css";
 import Legend from "./views/Legend";
+import Modal from "./Modal";
+import Snack from "./Snack";
 
 const drawerWidth = 240;
 
@@ -187,26 +189,8 @@ const User = ({
 
   return (
     <Box ref={myRef} sx={{ display: "flex" }}>
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loader}
-        onClick={handleClose}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
-      <Snackbar
-        open={snackOpen}
-        autoHideDuration={6000}
-        onClose={handleCloseSnack}
-      >
-        <Alert
-          onClose={handleCloseSnack}
-          severity="success"
-          sx={{ width: "100%" }}
-        >
-          {snackMessage}
-        </Alert>
-      </Snackbar>
+      <Modal handleClose={handleClose} loader={loader} />
+      <Snack />
       <CssBaseline />
       <AppBar position="fixed" open={open}>
         <Toolbar>

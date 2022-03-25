@@ -7,22 +7,17 @@ import TextField from "@mui/material/TextField";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Snackbar from "@mui/material/Snackbar";
-import Select from "@mui/material/Select";
-import MuiAlert from "@mui/material/Alert";
 
-import { createUser, toggleLoader, toggleSnack } from "../../actions";
+import Select from "@mui/material/Select";
+
+import { createUser, toggleLoader } from "../../actions";
 import "../../style.css";
 import Modal from "../Modal";
 
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-const NewUser = ({ loader, fetchBM, handleSnack, handleToggle, openSnack }) => {
+const NewUser = ({ loader, fetchBM, handleToggle }) => {
   const [cat, setCat] = React.useState(null);
   const [user, setUser] = React.useState(null);
 
-  const { snackOpen, snackMessage } = openSnack;
   const handleClose = () => {
     handleToggle(false);
   };
@@ -30,13 +25,7 @@ const NewUser = ({ loader, fetchBM, handleSnack, handleToggle, openSnack }) => {
   const handleChange = (event) => {
     setCat(event.target.value);
   };
-  const handleCloseSnack = () => {
-    const SNACK = {
-      snackOpen: false,
-      snackMessage: null,
-    };
-    handleSnack(SNACK);
-  };
+
   const handleChangeName = (e) => {
     setUser(e.target.value);
   };
@@ -49,19 +38,6 @@ const NewUser = ({ loader, fetchBM, handleSnack, handleToggle, openSnack }) => {
   return (
     <Box className="loginBox" component="main" sx={{ flexGrow: 1, p: 3 }}>
       <Modal loader={loader} handleClose={handleClose} />
-      <Snackbar
-        open={snackOpen}
-        autoHideDuration={6000}
-        onClose={handleCloseSnack}
-      >
-        <Alert
-          onClose={handleCloseSnack}
-          severity="success"
-          sx={{ width: "100%" }}
-        >
-          {snackMessage}
-        </Alert>
-      </Snackbar>
       <div>
         <TextField
           sx={{ width: "25ch" }}
@@ -121,5 +97,4 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps, {
   fetchBM: createUser,
   handleToggle: toggleLoader,
-  handleSnack: toggleSnack,
 })(NewUser);
