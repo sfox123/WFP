@@ -14,7 +14,7 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { blue } from "@mui/material/colors";
 import { connect } from "react-redux";
 
-import { getHistory, updateHistory } from "../../actions";
+import { getHistory, updateHistory, toggleLoader } from "../../actions";
 
 const columns = [
   { field: "staff", headerName: "Staff Name", width: 230 },
@@ -75,7 +75,14 @@ SimpleDialog.propTypes = {
   remarks: PropTypes.string.isRequired,
 };
 
-const History = ({ history, fetchHistory, user, fetchUpdate }) => {
+const History = ({
+  loader,
+  history,
+  fetchHistory,
+  user,
+  fetchUpdate,
+  setLoad,
+}) => {
   const [rows, setRows] = useState([]);
   const [open, setOpen] = React.useState(false);
   const [remarks, setRemarks] = React.useState("");
@@ -83,16 +90,14 @@ const History = ({ history, fetchHistory, user, fetchUpdate }) => {
   const [checkBox, setCheckBox] = React.useState([]);
 
   useEffect(() => {
-    fetchHistory();
-    history.map((x, i) => {
-      if (x.pending === false) {
-        history.splice(i, 1);
-      } else {
-        x.id = i;
-      }
+    // fetchHistory();
+    let tmp = [...history];
+    tmp.map((x, i) => {
+      x.id = i;
     });
-    setRows(history);
-  }, []);
+    tmp = tmp.filter((item) => item.pending === true);
+    setRows(tmp);
+  }, [loader]);
 
   const handleRowClick = (e) => {
     setRemarks(e.row.remarks);
@@ -108,16 +113,25 @@ const History = ({ history, fetchHistory, user, fetchUpdate }) => {
     setOpen(true);
   };
 
+  React.useLayoutEffect(() => {
+    fetchHistory();
+  }, [rows]);
+
   const handleSelectionRemove = (e) => {
     setCheckBox(e);
   };
-
+  //btn click
   const handleClick = () => {
+    setLoad(true);
+    let tmp = [...rows];
     let arrId = [];
     checkBox.map((x, i) => {
       arrId.push(history[x]._id);
+      tmp = tmp.filter((item) => !checkBox.includes(item.id));
     });
     fetchUpdate(arrId, user.name);
+    setLoad(false);
+    setRows(tmp);
   };
 
   return (
@@ -157,10 +171,15 @@ const History = ({ history, fetchHistory, user, fetchUpdate }) => {
 };
 
 const mapStateToProps = (state) => {
-  return { history: state.history, user: state.fetchData };
+  return {
+    loader: state.loader,
+    history: state.history,
+    user: state.fetchData,
+  };
 };
 
 export default connect(mapStateToProps, {
   fetchHistory: getHistory,
   fetchUpdate: updateHistory,
+  setLoad: toggleLoader,
 })(History);

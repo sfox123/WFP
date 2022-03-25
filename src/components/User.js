@@ -37,6 +37,7 @@ import { matchScore, toggleLoader, toggleSnack } from "../actions";
 import NewUser from "./views/NewUser";
 import History from "./views/History";
 import "../style.css";
+import Legend from "./views/Legend";
 
 const drawerWidth = 240;
 
@@ -138,6 +139,7 @@ const User = ({
   const [selectIndex, setSelectIndex] = React.useState(0);
   const [remarks, setRemarks] = React.useState("");
   const provideHistory = useHistory();
+  const myRef = React.useRef();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -184,7 +186,7 @@ const User = ({
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box ref={myRef} sx={{ display: "flex" }}>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loader}
@@ -322,6 +324,7 @@ const User = ({
       )}
       {selectIndex === 1 && <NewUser />}
       {selectIndex === 2 && <History />}
+      {selectIndex === 3 && <Legend />}
     </Box>
   );
 };

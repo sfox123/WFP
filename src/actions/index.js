@@ -158,6 +158,7 @@ const getMatch =
       xmlhttp.open("POST", uri, false);
       xmlhttp.send(params);
     });
+    dispatch(getHistory());
   };
 
 export const getHistory = () => async (dispatch, getState) => {
@@ -173,6 +174,6 @@ export const updateHistory = (list, author) => async (dispatch, getState) => {
     snackOpen: true,
     snackMessage: response.data,
   };
+  dispatch(getHistory());
   dispatch(toggleSnack(SNACK));
-  dispatch(toggleLoader(false));
 };
