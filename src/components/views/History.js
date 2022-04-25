@@ -14,7 +14,12 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { blue } from "@mui/material/colors";
 import { connect } from "react-redux";
 
-import { getHistory, updateHistory, toggleLoader } from "../../actions";
+import {
+  getHistory,
+  updateHistory,
+  toggleLoader,
+  setHistory,
+} from "../../actions";
 import Modal from "../Modal";
 import Snack from "../Snack";
 
@@ -95,6 +100,9 @@ class History extends React.Component {
     this.setState({ rows: tmp });
     console.log("running");
   }
+  // componentWillUnmount() {
+
+  // }
 
   handleRowClick = (e) => {
     this.setState({ remarks: e.row.remarks, selectedValue: e.row.itemName });
@@ -116,12 +124,17 @@ class History extends React.Component {
   };
   //btn click
   handleClick = () => {
+    let tmp = [...this.state.rows];
     let arrId = [];
     this.state.checkBox.map((x, i) => {
       arrId.push(this.props.history[x]._id);
+      tmp = tmp.filter((item) => !this.state.checkBox.includes(item.id));
     });
     this.props.fetchUpdate(arrId, this.props.user.name);
-    this.componentDidMount();
+    this.setState({ rows: tmp });
+    this.props.setRow(tmp);
+    this.setState({ checkBox: [] });
+    this.props.setLoad(false);
   };
   render() {
     return (
@@ -175,4 +188,5 @@ export default connect(mapStateToProps, {
   fetchHistory: getHistory,
   fetchUpdate: updateHistory,
   setLoad: toggleLoader,
+  setRow: setHistory,
 })(History);

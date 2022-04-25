@@ -25,12 +25,8 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import Button from "@mui/material/Button";
 import Fingerprint from "@mui/icons-material/Fingerprint";
-import CircularProgress from "@mui/material/CircularProgress";
-import Backdrop from "@mui/material/Backdrop";
+import PersonIcon from "@mui/icons-material/Person";
 import FormControl from "@mui/material/FormControl";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
-
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { matchScore, toggleLoader, toggleSnack } from "../actions";
@@ -40,6 +36,7 @@ import "../style.css";
 import Legend from "./views/Legend";
 import Modal from "./Modal";
 import Snack from "./Snack";
+import Settings from "./views/Settings";
 
 const drawerWidth = 240;
 
@@ -51,9 +48,7 @@ const openedMixin = (theme) => ({
   }),
   overflowX: "hidden",
 });
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+
 const closedMixin = (theme) => ({
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
@@ -127,14 +122,7 @@ const names = [
   "MOUSE",
   "WIFI ROUTER",
 ];
-const User = ({
-  loader,
-  fetchBM,
-  handleSnack,
-  handleToggle,
-  openSnack,
-  history,
-}) => {
+const User = ({ loader, fetchBM, handleToggle }) => {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [personName, setPersonName] = React.useState([]);
@@ -174,17 +162,13 @@ const User = ({
       typeof value === "string" ? value.split(",") : value
     );
   };
-  const { snackOpen, snackMessage } = openSnack;
 
   const handleClose = () => {
     handleToggle(false);
   };
-  const handleCloseSnack = () => {
-    const SNACK = {
-      snackOpen: false,
-      snackMessage: null,
-    };
-    handleSnack(SNACK);
+
+  const handleUser = () => {
+    handleSelect(4);
   };
 
   return (
@@ -208,19 +192,31 @@ const User = ({
           </IconButton>
           <Typography variant="h6" noWrap component="div">
             {selectIndex === 0
-              ? "Inventory Management"
+              ? "Item Assignment"
               : selectIndex === 1
-              ? "Add User"
+              ? "Add New Staff"
               : selectIndex === 2
               ? "Pending Items"
               : selectIndex === 3
-              ? "History"
+              ? "Recieved Items"
+              : selectIndex === 4
+              ? "User Settings"
               : null}
           </Typography>
-
-          <Button onClick={handleLogout} sx={{ ml: "auto" }} color="inherit">
-            Logout
-          </Button>
+          <Box sx={{ ml: "auto" }}>
+            <IconButton
+              onClick={handleUser}
+              sx={{ mr: 3 }}
+              className="svg_icons__person"
+              aria-label="user"
+              color="inherit"
+            >
+              <PersonIcon />
+            </IconButton>
+            <Button onClick={handleLogout} color="inherit">
+              Logout
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent" open={open}>
@@ -235,24 +231,27 @@ const User = ({
         </DrawerHeader>
         <Divider />
         <List>
-          {["Inventory Management", "Add User", "Pending Items", "History"].map(
-            (text, index) => (
-              <ListItem
-                id={index}
-                selected={index === selectIndex ? true : false}
-                onClick={() => {
-                  handleSelect(index);
-                }}
-                button
-                key={text}
-              >
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItem>
-            )
-          )}
+          {[
+            "Item Assignment",
+            "Add New Staff",
+            "Pending Items",
+            "Recieved Items",
+          ].map((text, index) => (
+            <ListItem
+              id={index}
+              selected={index === selectIndex ? true : false}
+              onClick={() => {
+                handleSelect(index);
+              }}
+              button
+              key={text}
+            >
+              <ListItemIcon>
+                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+              </ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItem>
+          ))}
         </List>
         <Divider />
       </Drawer>
@@ -309,6 +308,7 @@ const User = ({
       {selectIndex === 1 && <NewUser />}
       {selectIndex === 2 && <History />}
       {selectIndex === 3 && <Legend />}
+      {selectIndex === 4 && <Settings />}
     </Box>
   );
 };
@@ -317,7 +317,7 @@ const mapStateToProps = (state) => {
   return {
     logged: state.loggedIn.loggedIn,
     bioMetric: state.bioMetric,
-    openSnack: state.openSnack,
+
     loader: state.loader,
     history: state.history,
   };

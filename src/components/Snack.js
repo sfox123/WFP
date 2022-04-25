@@ -12,7 +12,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 });
 
 const Snack = ({ openSnack, handleSnack }) => {
-  const { snackOpen, snackMessage } = openSnack;
+  const { snackOpen, snackMessage, severity } = openSnack;
 
   const handleCloseSnack = () => {
     const SNACK = {
@@ -29,7 +29,7 @@ const Snack = ({ openSnack, handleSnack }) => {
     >
       <Alert
         onClose={handleCloseSnack}
-        severity="success"
+        severity={severity ? "error" : "success"}
         sx={{ width: "100%" }}
       >
         {snackMessage}

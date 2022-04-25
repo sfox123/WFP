@@ -125,6 +125,7 @@ const getMatch =
     var uri = "https://localhost:8443/SGIMatchScore";
     var xmlhttp = new XMLHttpRequest();
     let userId = "";
+    let length = 100;
     let assignedBy = getState().fetchData.name;
 
     xmlhttp.onreadystatechange = async function () {
@@ -143,6 +144,15 @@ const getMatch =
           };
           dispatch(toggleLoader(false));
           dispatch(toggleSnack(SNACK));
+        } else if (state.length - 1 === length) {
+          console.log(length);
+          const SNACK = {
+            snackOpen: true,
+            snackMessage: "User Not Found",
+            severity: false,
+          };
+          dispatch(toggleLoader(false));
+          dispatch(toggleSnack(SNACK));
         }
       }
     };
@@ -155,6 +165,8 @@ const getMatch =
         "&licstr=" +
         "&templateFormat=ISO";
       userId = state[i].name;
+      length = i;
+
       xmlhttp.open("POST", uri, false);
       xmlhttp.send(params);
     });
@@ -166,6 +178,20 @@ export const getHistory = () => async (dispatch, getState) => {
   dispatch({ type: "FETCH_HISTORY", payload: response.data });
 };
 
+export const setHistory = (arr) => async (dispatch, getState) => {
+  dispatch({ type: "FETCH_HISTORY", payload: arr });
+};
+
+export const changePass = (newPass) => async (dispatch, getState) => {
+  const id = getState().fetchData._id;
+  const response = await axios.post("/wfp/changePass", { id, newPass });
+  const SNACK = {
+    snackOpen: true,
+    snackMessage: response.data,
+  };
+  dispatch(toggleSnack(SNACK));
+};
+
 export const updateHistory = (list, author) => async (dispatch, getState) => {
   dispatch(toggleLoader(true));
   const response = await axios.post("/wfp/updateHistory", { list, author });
@@ -174,6 +200,5 @@ export const updateHistory = (list, author) => async (dispatch, getState) => {
     snackOpen: true,
     snackMessage: response.data,
   };
-  dispatch(getHistory());
   dispatch(toggleSnack(SNACK));
 };
