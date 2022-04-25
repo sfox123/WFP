@@ -8,7 +8,7 @@ import { BrowserRouter, Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { getHistory } from "../actions";
 
-const App = ({ loggedIn, fetchHistory }) => {
+const App = ({ fetchHistory }) => {
   useEffect(() => {
     fetchHistory();
   }, []);
