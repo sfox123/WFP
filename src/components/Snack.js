@@ -29,7 +29,7 @@ const Snack = ({ openSnack, handleSnack }) => {
     >
       <Alert
         onClose={handleCloseSnack}
-        severity={severity ? "error" : "success"}
+        severity={severity ? "success" : "error"}
         sx={{ width: "100%" }}
       >
         {snackMessage}

@@ -49,6 +49,7 @@ export const fetchUser = () => async (dispatch, getState) => {
 export const fetchApi = () => async (dispatch, getState) => {
   const userData = getState().currentUser;
   try {
+    dispatch(toggleLoader(true));
     const response = await axios.post("/wfp/login", { userData });
     await dispatch({ type: "FETCH_API", payload: response.data });
     await dispatch(loggedIn(true));
@@ -56,6 +57,12 @@ export const fetchApi = () => async (dispatch, getState) => {
     window.localStorage.setItem("id", response.data._id);
     window.location.href = "/User";
   } catch (error) {
+    const SNACK = {
+      snackOpen: true,
+      snackMessage: "Incorrect Password !",
+      severity: false,
+    };
+    dispatch(toggleSnack(SNACK));
     dispatch(passError(true));
     console.log(error);
   }
@@ -141,6 +148,7 @@ const getMatch =
           const SNACK = {
             snackOpen: true,
             snackMessage: response.data,
+            severity: true,
           };
           dispatch(toggleLoader(false));
           dispatch(toggleSnack(SNACK));

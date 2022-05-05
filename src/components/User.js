@@ -117,10 +117,22 @@ const MenuProps = {
 
 const names = [
   "LAPTOP",
-  "CHARGER - LAPTOP",
-  "CHARGER - MOBILE",
-  "MOUSE",
-  "WIFI ROUTER",
+  "LAPTOP - CHARGER",
+  "LAPTOP - DOCKING",
+  "LAPTOP - CARRYBAG BAG",
+  "MONITOR",
+  "KEYBOARD / MOUSE",
+  "WEBCAM",
+  "HEADSET",
+  "MOBILE-PHONE",
+  "MOBILE-CHARGER",
+  "TABLET",
+  "TABLET-CHARGER",
+  "PROJECTOR",
+  "POWER BANK",
+  "DIALOG ROUTER",
+  "POWER - EXTENTION",
+  "OTHER",
 ];
 const User = ({ loader, fetchBM, handleToggle }) => {
   const theme = useTheme();

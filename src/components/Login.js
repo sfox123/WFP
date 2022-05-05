@@ -14,21 +14,14 @@ import MuiAlert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 //REDUX
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
+import Snack from "../components/Snack";
 import { loggedUser, loggedUserPass, fetchApi, passError } from "../actions";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-const Login = ({
-  user,
-  handleName,
-  handleSnack,
-  handlePass,
-  loggedIn,
-  login,
-}) => {
+const Login = ({ user, handleName, handleSnack, handlePass, login }) => {
   const [value, setValue] = React.useState("");
 
   const [values, setValues] = React.useState({
@@ -66,15 +59,7 @@ const Login = ({
   };
   return (
     <Box className="loginBox">
-      <Snackbar
-        open={loggedIn.passError}
-        autoHideDuration={6000}
-        onClose={handleClose}
-      >
-        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
-          Incorrect Password !!
-        </Alert>
-      </Snackbar>
+      <Snack />
       <FormControl sx={{ m: 1, width: "25ch", mb: 3 }}>
         <InputLabel id="demo-simple-select-label">USER</InputLabel>
         <Select
