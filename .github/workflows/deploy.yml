@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: yarn install --frozen-lockfile
-      - run: yarn build
+      - run: CI= yarn build
       - name: GitHub Action for Firebase
         uses: w9jds/firebase-action@v1.5.0
         with:
