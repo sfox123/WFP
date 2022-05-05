@@ -61,9 +61,11 @@ const NewUser = ({ loader, fetchBM, handleToggle }) => {
           >
             <MenuItem value={"IT"}>IT</MenuItem>
             <MenuItem value={"ADMIN"}>ADMIN</MenuItem>
-            <MenuItem value={"PROGRAMMING"}>PROGRAMMING</MenuItem>
+            <MenuItem value={"FINANCE"}>FINANCE</MenuItem>
+            <MenuItem value={"PROGRAMME"}>PROGRAMME</MenuItem>
+            <MenuItem value={"MANAGEMENT"}>MANAGEMENT</MenuItem>
             <MenuItem value={"HR"}>HR</MenuItem>
-            <MenuItem value={"LOGISTIC"}>LOGISTIC</MenuItem>
+            <MenuItem value={"SUPPLY CHAIN"}>SUPPLY-CHAIN</MenuItem>
           </Select>
         </FormControl>
       </div>

@@ -95,6 +95,7 @@ export const createUser = (state) => async (dispatch, getState) => {
       const SNACK = {
         snackOpen: true,
         snackMessage: response.data,
+        severity: true,
       };
       dispatch(toggleLoader(false));
       dispatch(toggleSnack(SNACK));
@@ -144,6 +145,11 @@ const getMatch =
             assignedBy,
             itemName,
             remarks,
+          });
+          const sendMail = await axios.post("/sendMail", {
+            userId,
+            assignedBy,
+            itemName,
           });
           const SNACK = {
             snackOpen: true,
@@ -196,6 +202,7 @@ export const changePass = (newPass) => async (dispatch, getState) => {
   const SNACK = {
     snackOpen: true,
     snackMessage: response.data,
+    severity: true,
   };
   dispatch(toggleSnack(SNACK));
 };
@@ -207,6 +214,7 @@ export const updateHistory = (list, author) => async (dispatch, getState) => {
   const SNACK = {
     snackOpen: true,
     snackMessage: response.data,
+    severity: true,
   };
   dispatch(toggleSnack(SNACK));
 };
