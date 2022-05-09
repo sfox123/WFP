@@ -146,11 +146,6 @@ const getMatch =
             itemName,
             remarks,
           });
-          const sendMail = await axios.post("/sendMail", {
-            userId,
-            assignedBy,
-            itemName,
-          });
           const SNACK = {
             snackOpen: true,
             snackMessage: response.data,
