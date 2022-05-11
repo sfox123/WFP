@@ -83,6 +83,15 @@ const foundUserReducer = (state = null, action) => {
   }
 };
 
+const alertReducer = (state = false, action) => {
+  switch (action.type) {
+    case "ALERT":
+      return action.payload;
+    default:
+      return state;
+  }
+};
+
 export default combineReducers({
   user: userReducer,
   currentUser: loggedUserReducer,
@@ -91,6 +100,7 @@ export default combineReducers({
   bioMetric: fetchBioMetricReducer,
   loader: loaderReducer,
   openSnack: snackReducer,
+  alertOpen: alertReducer,
   foundUser: foundUserReducer,
   history: HistoryReducer,
 });

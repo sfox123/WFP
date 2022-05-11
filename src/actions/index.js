@@ -111,24 +111,26 @@ export const toggleLoader = (state) => {
   };
 };
 
-export const matchScore = (itemName, remarks) => async (dispatch, getState) => {
-  await dispatch(toggleLoader(true));
-  const response = await axios.post("https://localhost:8443/SGIFPCapture");
+export const matchScore =
+  (itemName, remarks, inv) => async (dispatch, getState) => {
+    await dispatch(toggleLoader(true));
+    const response = await axios.post("https://localhost:8443/SGIFPCapture");
 
-  const bioMetricList = await axios.post("/wfp/getFp");
-  dispatch({ type: "FETCH_USER", payload: bioMetricList.data });
-  dispatch(
-    getMatch(
-      bioMetricList.data,
-      response.data.TemplateBase64,
-      itemName,
-      remarks
-    )
-  );
-};
+    const bioMetricList = await axios.post("/wfp/getFp");
+    dispatch({ type: "FETCH_USER", payload: bioMetricList.data });
+    dispatch(
+      getMatch(
+        bioMetricList.data,
+        response.data.TemplateBase64,
+        itemName,
+        remarks,
+        inv
+      )
+    );
+  };
 
 const getMatch =
-  (state = [], bmOne, itemName, remarks) =>
+  (state = [], bmOne, itemName, remarks, inv) =>
   async (dispatch, getState) => {
     var uri = "https://localhost:8443/SGIMatchScore";
     var xmlhttp = new XMLHttpRequest();
@@ -145,6 +147,7 @@ const getMatch =
             assignedBy,
             itemName,
             remarks,
+            inv,
           });
           const SNACK = {
             snackOpen: true,
@@ -212,4 +215,11 @@ export const updateHistory = (list, author) => async (dispatch, getState) => {
     severity: true,
   };
   dispatch(toggleSnack(SNACK));
+};
+
+export const handleAlert = (state) => {
+  return {
+    type: "ALERT",
+    payload: state,
+  };
 };

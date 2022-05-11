@@ -36,3 +36,38 @@
 .svg_icons__person {
   transform: scale(1.2);
 }
+.ais-SearchBox{
+  margin: 0 2rem;
+}
+.ais-SearchBox-input{
+  font-size: .8rem;
+  padding: .8rem 4rem .8rem 1rem;
+  font-family: inherit;
+  background-color: rgba(white, .5);
+  outline: none;
+  border: none;
+  border-radius: 2px;
+  border-bottom: 3px solid transparent;
+}
+.ais-SearchBox-input:focus{
+  outline: none;
+  box-shadow: 0 1rem 2rem rgba(black, .1);
+  border-bottom: 3px solid #1976d2;
+} 
+.ais-SearchBox-input::-webkit-input-placeholder{
+  color: #999;
+  /* text-align: right; */
+  font-size: 1rem;
+}
+.ais-SearchBox-submit{
+  padding: .5rem 1.2rem;
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: .5rem;
+}
+.ais-SearchBox-submitIcon{
+  fill: white;
+  cursor: pointer;
+  transform: scale(1.5);
+}
