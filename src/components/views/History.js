@@ -140,7 +140,7 @@ class History extends React.Component {
     return (
       <Box>
         <Modal handleClose={this.handleModal} loader={this.props.loader} />
-        <Snack />
+
         <div className="tableBox" style={{ height: 400 }}>
           <DataGrid
             sx={{ width: "75rem" }}

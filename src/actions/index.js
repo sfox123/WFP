@@ -111,26 +111,19 @@ export const toggleLoader = (state) => {
   };
 };
 
-export const matchScore =
-  (itemName, remarks, inv) => async (dispatch, getState) => {
-    await dispatch(toggleLoader(true));
-    const response = await axios.post("https://localhost:8443/SGIFPCapture");
+export const matchScore = (itemName) => async (dispatch, getState) => {
+  await dispatch(toggleLoader(true));
+  const response = await axios.post("https://localhost:8443/SGIFPCapture");
 
-    const bioMetricList = await axios.post("/wfp/getFp");
-    dispatch({ type: "FETCH_USER", payload: bioMetricList.data });
-    dispatch(
-      getMatch(
-        bioMetricList.data,
-        response.data.TemplateBase64,
-        itemName,
-        remarks,
-        inv
-      )
-    );
-  };
+  const bioMetricList = await axios.post("/wfp/getFp");
+  dispatch({ type: "FETCH_USER", payload: bioMetricList.data });
+  dispatch(
+    getMatch(bioMetricList.data, response.data.TemplateBase64, itemName)
+  );
+};
 
 const getMatch =
-  (state = [], bmOne, itemName, remarks, inv) =>
+  (state = [], bmOne, itemName) =>
   async (dispatch, getState) => {
     var uri = "https://localhost:8443/SGIMatchScore";
     var xmlhttp = new XMLHttpRequest();
@@ -139,16 +132,15 @@ const getMatch =
     let assignedBy = getState().fetchData.name;
 
     xmlhttp.onreadystatechange = async function () {
-      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+      if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
         var fpobject = JSON.parse(xmlhttp.responseText);
         if (fpobject.MatchingScore >= 50) {
           const response = await axios.post("/wfp/postHistory", {
             userId,
             assignedBy,
             itemName,
-            remarks,
-            inv,
           });
+          const res = await axios.post("/algolia");
           const SNACK = {
             snackOpen: true,
             snackMessage: response.data,

@@ -9,17 +9,15 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
 import PersonIcon from "@mui/icons-material/Person";
 import IconButton from "@mui/material/IconButton";
-import AddIcon from "@mui/icons-material/Add";
+import Fingerprint from "@mui/icons-material/Fingerprint";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { blue } from "@mui/material/colors";
 //react
 import { connect } from "react-redux";
-import { handleAlert } from "../actions";
-
-const emails = ["username@gmail.com", "user02@gmail.com"];
+import { handleAlert, matchScore } from "../actions";
 
 const Alert = (props) => {
-  const { handleAlert, alertOpen, list, setCart } = props;
+  const { handleAlert, alertOpen, list, setCart, matchScore } = props;
 
   const handleClose = () => {
     handleAlert(false);
@@ -31,7 +29,10 @@ const Alert = (props) => {
     tmp.splice(tmp.indexOf(e), 1);
     setCart(tmp);
   };
-
+  const handleBio = () => {
+    matchScore(list);
+    setCart([]);
+  };
   return ReactDOM.createPortal(
     <>
       {list.length === 0 && (
@@ -63,16 +64,21 @@ const Alert = (props) => {
                 </ListItem>
               ))}
             <ListItem
-              autoFocus
-              button
-              onClick={() => console.log("addAccount")}
+              div
+              sx={{
+                mt: 3,
+                display: "flex",
+                justifyContent: "center",
+              }}
             >
-              <ListItemAvatar>
-                <Avatar>
-                  <AddIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary="Add account" />
+              <IconButton
+                className="svg_icons"
+                aria-label="addCart"
+                color="success"
+                onClick={handleBio}
+              >
+                <Fingerprint />
+              </IconButton>
             </ListItem>
           </List>
         </Dialog>
@@ -84,4 +90,4 @@ const Alert = (props) => {
 const mapStateToProps = (state) => {
   return state;
 };
-export default connect(mapStateToProps, { handleAlert })(Alert);
+export default connect(mapStateToProps, { handleAlert, matchScore })(Alert);

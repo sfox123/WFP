@@ -42,7 +42,6 @@ const Settings = ({ fetchData, setPass }) => {
       onSubmit={handleSubmit}
       sx={{ flexGrow: 1, p: 3 }}
     >
-      <Snack />
       <Typography component="h4" variant="h4" mb={3}>
         Change Password
       </Typography>
