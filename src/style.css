@@ -110,3 +110,8 @@ em{
   font-weight: 900;
   font-size: 1rem;
 }
+.highlight{
+  background-color: yellow;
+  display: inline-block;
+  font-weight: bolder;
+}

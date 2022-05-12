@@ -15,9 +15,13 @@ import { blue } from "@mui/material/colors";
 //react
 import { connect } from "react-redux";
 import { handleAlert, matchScore } from "../actions";
+import Modal from "./Modal";
 
 const Alert = (props) => {
-  const { handleAlert, alertOpen, list, setCart, matchScore } = props;
+  const [open, setOpen] = React.useState(false);
+  const { handleAlert, alertOpen, list, setCart, matchScore, openSnack } =
+    props;
+  const { snackOpen } = openSnack;
 
   const handleClose = () => {
     handleAlert(false);
@@ -29,8 +33,13 @@ const Alert = (props) => {
     tmp.splice(tmp.indexOf(e), 1);
     setCart(tmp);
   };
+  const handleModal = () => {
+    setOpen(false);
+  };
   const handleBio = () => {
     matchScore(list);
+    handleAlert(false);
+    setOpen(true);
     setCart([]);
   };
   return ReactDOM.createPortal(
@@ -42,6 +51,7 @@ const Alert = (props) => {
       )}
       {list.length > 0 && (
         <Dialog onClose={handleClose} open={alertOpen}>
+          <Modal handleClose={handleModal} loader={open} />
           <DialogTitle>Bucket Items</DialogTitle>
           <List sx={{ pt: 0 }}>
             {list.length > 0 &&
