@@ -2,14 +2,11 @@ import * as React from "react";
 import ReactDOM from "react-dom";
 import List from "@mui/material/List";
 import Dialog from "@mui/material/Dialog";
-import Divider from "@mui/material/Divider";
-import Paper from "@mui/material/Paper";
 import MenuList from "@mui/material/MenuList";
-import MenuItem from "@mui/material/MenuItem";
 import DialogContent from "@mui/material/DialogContent";
+import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
-// import { Search } from "@material-ui/icons";
-
+import ListItem from "@mui/material/ListItem";
 import { styled, alpha } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
@@ -24,6 +21,7 @@ import {
   connectAutoComplete,
 } from "react-instantsearch-dom";
 import { Link } from "react-router-dom";
+
 const searchClient = algoliasearch(
   "O1TFPYIGTD",
   "fca90bb7e73bbd3a2a81c43430cc4e82"
@@ -93,31 +91,52 @@ const Search = ({ openSearch, setOpen }) => {
           }}
         />
       </MaterialSearch>
-      <Paper
-        sx={{
-          scrollBehavior: "smooth",
-          width: 320,
-          marginTop: 5,
-          padding: 2,
-          maxWidth: "100%",
-        }}
-      >
+      <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
         <MenuList>
           {hits.map((hit, i) => (
-            <div>
+            <div key={i}>
               <Link
                 style={{ textDecoration: "none", color: "inherit" }}
                 to={`/${hit._id}/details/${currentRefinement || hit.name}`}
               >
-                <MenuItem sx={{ padding: 2 }}>
-                  <Highlight attribute={`name`} hit={hit} />
-                </MenuItem>
+                <ListItem
+                  sx={{
+                    padding: 2,
+                    display: "flex",
+                    alignContent: "start",
+                    flexDirection: "column",
+                  }}
+                >
+                  {currentRefinement.length > 0 &&
+                    hit._highlightResult.name.matchedWords.length > 0 && (
+                      <Highlight attribute={`name`} hit={hit} />
+                    )}
+
+                  {currentRefinement.length > 0 &&
+                    hit._highlightResult.items.map(
+                      (x, index) =>
+                        x.invNumber.matchedWords.length > 0 && (
+                          <Button key={index} style={{}}>
+                            <span
+                              style={{ marginRight: "2rem" }}
+                              dangerouslySetInnerHTML={{
+                                __html:
+                                  hit.name +
+                                  " - " +
+                                  x.title.value +
+                                  " - " +
+                                  x.invNumber.value,
+                              }}
+                            />
+                          </Button>
+                        )
+                    )}
+                </ListItem>
               </Link>
-              <Divider sx={{}} />
             </div>
           ))}
         </MenuList>
-      </Paper>
+      </List>
     </>
   );
 
@@ -134,27 +153,10 @@ const Search = ({ openSearch, setOpen }) => {
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
-          <DialogTitle id="alert-dialog-title">
-            {/* <SearchBox placeholder="Search ..." /> */}
-          </DialogTitle>
+          <DialogTitle id="alert-dialog-title"></DialogTitle>
           <DialogContent>
-            <ul
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-around",
-              }}
-            >
-              <List
-                sx={{
-                  width: "100%",
-                  maxWidth: 360,
-                  bgcolor: "background.paper",
-                }}
-              >
-                <CustomAutocomplete />
-              </List>
-            </ul>
+            <CustomAutocomplete defaultRefinement="0104" />
+
             <div className="pagination">
               <Pagination />
             </div>

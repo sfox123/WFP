@@ -115,3 +115,23 @@ em{
   display: inline-block;
   font-weight: bolder;
 }
+
+ais-highlight-0000000000{
+  background-color: yellow;
+    font-weight: bolder;
+}
+
+.banner{
+  background-position: center;
+  background-size: cover;
+  width: 50%;
+  height: 25%;
+  
+}
+
+.canvas{
+    box-shadow: 0 1rem 2rem rgba(black, .1);
+  border: solid 1px black;
+  width: 50%;
+  /* min-height: 500px; */
+}

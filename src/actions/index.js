@@ -1,5 +1,5 @@
 import axios from "../api/axios";
-
+import { mMail } from './mail';
 // action creator
 export const loggedUser = (user) => {
   //return an action
@@ -43,7 +43,7 @@ export const fetchUser = () => async (dispatch, getState) => {
     const response = await axios.post("/wfp/getUser", { id });
     await dispatch({ type: "FETCH_API", payload: response.data });
     await dispatch(loggedIn(true));
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export const fetchApi = () => async (dispatch, getState) => {
@@ -104,6 +104,28 @@ export const createUser = (state) => async (dispatch, getState) => {
     alert(error);
   }
 };
+export const createUserMail = (state) => async (dispatch, getState) => {
+  try {
+    dispatch(toggleLoader(true));
+    const { userName, userUnit } = state;
+    const response = await axios.post("/wfp/getMail", {
+      userName,
+      userUnit,
+    });
+    if (response.status === 200) {
+      const SNACK = {
+        snackOpen: true,
+        snackMessage: 'Downloading Mail .. !',
+        severity: true,
+      };
+      dispatch(toggleLoader(false));
+      dispatch(toggleSnack(SNACK));
+      mMail(response.data)
+    }
+  } catch (error) {
+    alert(error);
+  }
+};
 export const toggleLoader = (state) => {
   return {
     type: "TOGGLE_LOADER",
@@ -114,8 +136,8 @@ export const toggleLoader = (state) => {
 export const matchScore = (itemName) => async (dispatch, getState) => {
   await dispatch(toggleLoader(true));
   const response = await axios.post("https://localhost:8443/SGIFPCapture");
-
   const bioMetricList = await axios.post("/wfp/getFp");
+  console.log(response)
   dispatch({ type: "FETCH_USER", payload: bioMetricList.data });
   dispatch(
     getMatch(bioMetricList.data, response.data.TemplateBase64, itemName)
@@ -124,58 +146,70 @@ export const matchScore = (itemName) => async (dispatch, getState) => {
 
 const getMatch =
   (state = [], bmOne, itemName) =>
-  async (dispatch, getState) => {
-    var uri = "https://localhost:8443/SGIMatchScore";
-    var xmlhttp = new XMLHttpRequest();
-    let userId = "";
-    let length = 100;
-    let assignedBy = getState().fetchData.name;
+    async (dispatch, getState) => {
+      try {
+        var uri = "https://localhost:8443/SGIMatchScore";
+        var xmlhttp = new XMLHttpRequest();
+        let userId = "";
+        let tmpArr = [...state];
+        let index = {};
+        let assignedBy = getState().fetchData.name;
 
-    xmlhttp.onreadystatechange = async function () {
-      if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-        var fpobject = JSON.parse(xmlhttp.responseText);
-        if (fpobject.MatchingScore >= 50) {
-          const response = await axios.post("/wfp/postHistory", {
-            userId,
-            assignedBy,
-            itemName,
-          });
-          const res = await axios.post("/algolia");
-          const SNACK = {
-            snackOpen: true,
-            snackMessage: response.data,
-            severity: true,
-          };
-          dispatch(toggleLoader(false));
-          dispatch(toggleSnack(SNACK));
-        } else if (state.length - 1 === length) {
-          console.log(length);
-          const SNACK = {
-            snackOpen: true,
-            snackMessage: "User Not Found",
-            severity: false,
-          };
-          dispatch(toggleLoader(false));
-          dispatch(toggleSnack(SNACK));
-        }
+        xmlhttp.onreadystatechange = async function () {
+          if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+            var fpobject = JSON.parse(xmlhttp.responseText);
+            if (fpobject.MatchingScore >= 50) {
+              const response = await axios.post("/wfp/postHistory", {
+                userId,
+                assignedBy,
+                itemName,
+              });
+              const res = await axios.post("/algolia");
+              const SNACK = {
+                snackOpen: true,
+                snackMessage: response.data,
+                severity: true,
+              };
+              dispatch(toggleLoader(false));
+              dispatch(toggleSnack(SNACK));
+            } else {
+              tmpArr.splice(tmpArr.indexOf(index), 1);
+              if (tmpArr.length === 0) {
+                const SNACK = {
+                  snackOpen: true,
+                  snackMessage: "User Not Found",
+                  severity: false,
+                };
+                dispatch(toggleLoader(false));
+                dispatch(toggleSnack(SNACK));
+              }
+            }
+          }
+        };
+        state.map(async (x, i) => {
+          const params =
+            "template1=" +
+            encodeURIComponent(bmOne) +
+            "&template2=" +
+            encodeURIComponent(state[i].biometric) +
+            "&licstr=" +
+            "&templateFormat=ISO";
+          userId = state[i].name;
+          index = x;
+          xmlhttp.open("POST", uri, false);
+          xmlhttp.send(params);
+        });
+        dispatch(getHistory());
+      } catch (error) {
+        const SNACK = {
+          snackOpen: true,
+          snackMessage: "User Not Found",
+          severity: false,
+        };
+        dispatch(toggleLoader(false));
+        dispatch(toggleSnack(SNACK));
       }
     };
-    state.map(async (x, i) => {
-      const params =
-        "template1=" +
-        encodeURIComponent(bmOne) +
-        "&template2=" +
-        encodeURIComponent(state[i].biometric) +
-        "&licstr=" +
-        "&templateFormat=ISO";
-      userId = state[i].name;
-      length = i;
-
-      xmlhttp.open("POST", uri, false);
-      xmlhttp.send(params);
-    });
-    dispatch(getHistory());
-  };
 
 export const getHistory = () => async (dispatch, getState) => {
   const response = await axios.get("/wfp/getHistory");

@@ -21,7 +21,7 @@ import {
   setHistory,
 } from "../../actions";
 import Modal from "../Modal";
-import Snack from "../Snack";
+
 
 function SimpleDialog(props) {
   const { onClose, selectedValue, open, remarks } = props;
@@ -92,13 +92,19 @@ class History extends React.Component {
 
   componentDidMount() {
     this.props.fetchHistory();
-    let tmp = [...this.props.history];
-    tmp.map((x, i) => {
+    let tmp = [...this.props?.history];
+    let newArr = [];
+    tmp?.map((x, i) => {
       x.id = i;
+      x?.itemName.map((y, index) => {
+        if (typeof y === "object") {
+          newArr.push(y.title);
+          x.itemName = newArr;
+        }
+      });
     });
     tmp = tmp.filter((item) => item.pending === true);
     this.setState({ rows: tmp });
-    console.log("running");
   }
   // componentWillUnmount() {
 

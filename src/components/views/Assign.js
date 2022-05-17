@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useRef } from "react";
 
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Autocomplete from "@mui/material/Autocomplete";
 import FormControl from "@mui/material/FormControl";
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -12,7 +15,7 @@ const itemList = [
   { itemName: "LAPTOP", gems: false },
   { itemName: "LAPTOP - CHARGER", gems: false },
   { itemName: "LAPTOP - DOCKING", gems: false },
-  { itemName: "LAPTOP - CARRYBAG BAG", gems: false },
+  { itemName: "LAPTOP - CARRYBAG", gems: false },
   { itemName: "MONITOR", gems: false },
   { itemName: "KEYBOARD / MOUSE", gems: false },
   { itemName: "WEBCAM", gems: false },
@@ -31,9 +34,11 @@ const itemList = [
 const Assign = ({ cart, setCart }) => {
   const [personName, setPersonName] = React.useState([]);
   const [btnSubmit, setBtnSubmit] = React.useState(true);
+  const [checked, setChecked] = React.useState(false);
+  const [error, setError] = React.useState(false);
   const [remarks, setRemarks] = React.useState("");
   const [inv, setInv] = React.useState("");
-
+  const invRef = useRef({});
   const handleRemarks = (e) => {
     setRemarks(e.target.value);
   };
@@ -41,16 +46,23 @@ const Assign = ({ cart, setCart }) => {
     setInv(e.target.value);
   };
   const addCart = () => {
-    let tmpObject = {
-      title: personName.title,
-      invNumber: inv,
-      remark: remarks,
-    };
-    let newArr = [...cart];
-    newArr.unshift(tmpObject);
-    setCart(newArr);
-    setInv("");
-    setBtnSubmit(false);
+    if (checked && invRef.current.value === "") {
+      setError(true)
+    } else {
+      let tmpObject = {
+        title: personName.title,
+        invNumber: inv,
+        remark: remarks,
+        gems: checked,
+        verified: false
+      };
+      let newArr = [...cart];
+      newArr.unshift(tmpObject);
+      setCart(newArr);
+      setInv("");
+      setError(false)
+      setBtnSubmit(false);
+    }
   };
   return (
     <Box className="loginBox" component="main" sx={{ flexGrow: 1, p: 3 }}>
@@ -82,16 +94,21 @@ const Assign = ({ cart, setCart }) => {
         </FormControl>
       </div>
       <div>
-        <FormControl sx={{ mt: 2, mb: 2, width: 300, display: "block" }}>
+        <FormGroup>
+          <FormControlLabel disabled={btnSubmit} onClick={(e) => setChecked(e.target.checked)} control={<Checkbox />} label="GEMS" />
+        </FormGroup>
+        {checked && <FormControl sx={{ mt: 2, mb: 2, width: 300, display: "block" }}>
           <TextField
             sx={{ width: "35ch" }}
             label="Inventory Number"
+            inputRef={invRef}
             value={inv}
+            error={error}
             id="filled-size-normal"
             variant="filled"
             onChange={handleInventory}
           />
-        </FormControl>
+        </FormControl>}
         <FormControl sx={{ mt: 2, mb: 2, width: 300 }}>
           <TextField
             sx={{ width: "35ch" }}
