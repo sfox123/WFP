@@ -137,7 +137,7 @@ export const matchScore = (itemName) => async (dispatch, getState) => {
   await dispatch(toggleLoader(true));
   const response = await axios.post("https://localhost:8443/SGIFPCapture");
   const bioMetricList = await axios.post("/wfp/getFp");
-  console.log(response)
+  console.log(bioMetricList.data)
   dispatch({ type: "FETCH_USER", payload: bioMetricList.data });
   dispatch(
     getMatch(bioMetricList.data, response.data.TemplateBase64, itemName)
@@ -148,6 +148,7 @@ const getMatch =
   (state = [], bmOne, itemName) =>
     async (dispatch, getState) => {
       try {
+        var secugen_lic = "hE/78I5oOUJnm5fa5zDDRrEJb5tdqU71AVe+/Jc2RK05";
         var uri = "https://localhost:8443/SGIMatchScore";
         var xmlhttp = new XMLHttpRequest();
         let userId = "";
@@ -199,7 +200,6 @@ const getMatch =
           xmlhttp.open("POST", uri, false);
           xmlhttp.send(params);
         });
-        dispatch(getHistory());
       } catch (error) {
         const SNACK = {
           snackOpen: true,
