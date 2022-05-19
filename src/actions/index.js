@@ -1,5 +1,5 @@
 import axios from "../api/axios";
-import { mMail } from './mail';
+import { createMail } from './mail';
 // action creator
 export const loggedUser = (user) => {
   //return an action
@@ -120,7 +120,7 @@ export const createUserMail = (state) => async (dispatch, getState) => {
       };
       dispatch(toggleLoader(false));
       dispatch(toggleSnack(SNACK));
-      mMail(response.data)
+      createMail(response.data)
     }
   } catch (error) {
     alert(error);
@@ -137,12 +137,14 @@ export const matchScore = (itemName) => async (dispatch, getState) => {
   await dispatch(toggleLoader(true));
   const response = await axios.post("https://localhost:8443/SGIFPCapture");
   const bioMetricList = await axios.post("/wfp/getFp");
-  console.log(bioMetricList.data)
   dispatch({ type: "FETCH_USER", payload: bioMetricList.data });
+  console.log(bioMetricList.data)
   dispatch(
     getMatch(bioMetricList.data, response.data.TemplateBase64, itemName)
   );
 };
+
+
 
 const getMatch =
   (state = [], bmOne, itemName) =>
@@ -155,11 +157,13 @@ const getMatch =
         let tmpArr = [...state];
         let index = {};
         let assignedBy = getState().fetchData.name;
-
+        let run = true;
         xmlhttp.onreadystatechange = async function () {
           if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
             var fpobject = JSON.parse(xmlhttp.responseText);
             if (fpobject.MatchingScore >= 50) {
+              console.log(fpobject)
+              run = false;
               const response = await axios.post("/wfp/postHistory", {
                 userId,
                 assignedBy,
@@ -176,6 +180,7 @@ const getMatch =
             } else {
               tmpArr.splice(tmpArr.indexOf(index), 1);
               if (tmpArr.length === 0) {
+                run = false
                 const SNACK = {
                   snackOpen: true,
                   snackMessage: "User Not Found",
@@ -187,18 +192,20 @@ const getMatch =
             }
           }
         };
-        state.map(async (x, i) => {
-          const params =
-            "template1=" +
-            encodeURIComponent(bmOne) +
-            "&template2=" +
-            encodeURIComponent(state[i].biometric) +
-            "&licstr=" +
-            "&templateFormat=ISO";
-          userId = state[i].name;
-          index = x;
-          xmlhttp.open("POST", uri, false);
-          xmlhttp.send(params);
+        state.map((x, i) => {
+          if (run) {
+            const params =
+              "template1=" +
+              encodeURIComponent(bmOne) +
+              "&template2=" +
+              encodeURIComponent(state[i].biometric) +
+              "&licstr=" +
+              "&templateFormat=ISO";
+            userId = state[i].name;
+            index = x;
+            xmlhttp.open("POST", uri, false);
+            xmlhttp.send(params);
+          }
         });
       } catch (error) {
         const SNACK = {
@@ -241,6 +248,7 @@ export const updateHistory = (list, author) => async (dispatch, getState) => {
     severity: true,
   };
   dispatch(toggleSnack(SNACK));
+  dispatch(toggleLoader(false));
 };
 
 export const handleAlert = (state) => {

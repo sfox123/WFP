@@ -53,7 +53,7 @@ function a11yProps(index) {
 }
 
 
-const Signature = ({ toggleLoader, toggleSnack }) => {
+const SignMail = ({ toggleLoader, toggleSnack }) => {
     const [value, setValue] = React.useState(0);
     const [imageData, setImageData] = React.useState()
     const [valid, setValid] = useState();
@@ -94,11 +94,8 @@ const Signature = ({ toggleLoader, toggleSnack }) => {
     const saveCanvas = async () => {
         try {
             setOpen(true);
-            setImageData(signCanvas.current.getTrimmedCanvas().toDataURL("image/png"))
-            let img = signCanvas.current.getTrimmedCanvas().toDataURL("image/png");
-            console.log(imageData)
-            const response = await axios.post('/wfp/setImage', { id, img });
-            signClear();
+            const response = await axios.post('/wfp/postVerification', { id });
+
             const SNACK = {
                 snackOpen: true,
                 snackMessage: response.data,
@@ -115,7 +112,7 @@ const Signature = ({ toggleLoader, toggleSnack }) => {
 
     return (
         <>
-            {valid && <Box sx={{ width: '100%' }}>
+            <Box sx={{ width: '100%' }}>
                 <Modal handleClose={handleClose} loader={open} />
                 <Snack />
                 <Box>
@@ -124,8 +121,6 @@ const Signature = ({ toggleLoader, toggleSnack }) => {
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                         <Tab label="E-Signature" {...a11yProps(0)} />
-                        <Tab label="Item Two" {...a11yProps(1)} />
-                        <Tab label="Item Three" {...a11yProps(2)} />
                     </Tabs>
                 </Box>
                 <TabPanel value={value} index={0}>
@@ -133,13 +128,13 @@ const Signature = ({ toggleLoader, toggleSnack }) => {
                         USER - {data?.name}
                     </Typography>
                     <Typography variant="p" gutterBottom component="div">
-                        Draw Below
+                        Use This Signature
                     </Typography>
                     <Box display={'flex'} flexDirection="column">
-                        <SignaturePad ref={signCanvas} canvasProps={{ className: 'canvas' }} />
+                        <img src={data?.signature} width='25%' />
                     </Box>
                     <br />
-                    <Button sx={{ mt: 1 }} onClick={signClear} variant='contained' color='warning'>Try Again</Button>
+                    {/* <Button sx={{ mt: 1 }} onClick={signClear} variant='contained' color='warning'>Try Again</Button> */}
 
                     <Button sx={{ mt: 1, ml: 5 }} onClick={saveCanvas} variant='contained' color='success'>Submit</Button>
                 </TabPanel>
@@ -150,35 +145,7 @@ const Signature = ({ toggleLoader, toggleSnack }) => {
                     Item Three
                 </TabPanel>
             </Box>
-            }
-            {
-                !valid && <div className={styles.body} style={{ background: 'rgba(96, 196, 196, .3)' }}>
-                    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                        viewBox="0 0 464 390.4" style={{ width: '30%', margin: '0 5% 3vh !important', enableBackground: 'new 0 0 464 390.4' }} xmlSpace="preserve">
 
-                        <circle className={styles.st0} cx="126" cy="175.4" r="12" />
-                        <circle className={styles.st0} cx="339" cy="175.4" r="12" />
-                        <circle className={styles.st1} cx="232.5" cy="170.9" r="106.5" />
-                        <path className={styles.st2} d="M126,164.4c0,0,4.5-15.4,10.5-19.6c0,0,31,0,65-26.5c0,0,110,85.9,176-30.8c0,0-33,28.6-116-41.4
-    c0,0-131-16.2-135.5,106V164.4z"/>
-                        <path className={styles.st2} d="M339,164.4c0,0,6.2-13.3-8.2-32.4l-6.3,3.9C324.5,135.9,333.5,142.9,339,164.4z" />
-                        <path className={styles.st2} d="M247.8,45.3c0,0,47.7-5.3,76.7,53.7L247.8,45.3z" />
-                        <circle className={styles.st2} cx="192" cy="175.4" r="9" />
-                        <circle className={styles.st2} cx="271" cy="175.4" r="9" />
-                        <path className={styles.st4} d="M101.4,390.1c22.1-106.8,75.7-114.1,137.1-114.1c61.4,0,104,18.8,130.1,114.1
-    C368.7,390.6,101.3,390.6,101.4,390.1z"/>
-
-                        <circle id="path" className={styles.st3} cx="234.5" cy="230.5" r="20" />
-                    </svg>
-
-                    <div className={styles.message}>
-                        <h1>Oops, this link is expired</h1>
-                        <h3>{data?.name} - Your Account Has been Already Created</h3>
-                        <p>This URL is not valid anymore.</p>
-
-                    </div>
-                </div>
-            }
         </>
     )
 }
@@ -187,4 +154,4 @@ const mapStateToProps = (state) => {
     return state;
 }
 
-export default connect(mapStateToProps, { toggleLoader, toggleSnack })(Signature);
+export default connect(mapStateToProps, { toggleLoader, toggleSnack })(SignMail);

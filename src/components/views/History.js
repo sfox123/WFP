@@ -1,17 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
-import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import DialogTitle from "@mui/material/DialogTitle";
-import Dialog from "@mui/material/Dialog";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
-import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import { blue } from "@mui/material/colors";
+import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
+import axios from '../../api/axios';
 import { connect } from "react-redux";
 
 import {
@@ -22,170 +14,112 @@ import {
 } from "../../actions";
 import Modal from "../Modal";
 
+const History = (props) => {
+  const [rows, setRows] = useState([])
+  const [data, setData] = useState([])
+  const [open, setOpen] = useState(true);
+  const [checkBox, setCheckBox] = useState([])
 
-function SimpleDialog(props) {
-  const { onClose, selectedValue, open, remarks } = props;
+  const columns = [
+    { field: "name", headerName: "Staff Name", width: 230 },
+    { field: "title", headerName: "ITEMS", width: 230 },
+    { field: "assignedBy", headerName: "Assigned By", width: 230 },
+    { field: "verified", type: 'boolean', headerName: "Verified", width: 230 },
+    { field: "date", headerName: "Date", width: 130 },
+  ];
 
-  const handleClose = () => {
-    onClose(selectedValue);
-  };
+  useEffect(() => {
+    async function CleanData() {
+      const response = await axios.get('/wfp/getHistory');
+      setData(response.data);
+      let tmp = [...data];
+      tmp.reverse()
+      let newArr = [];
+      tmp.map((x, i) => {
+        x.id = i;
 
-  return (
-    <Dialog onClose={handleClose} open={open}>
-      <DialogTitle>ITEM LIST</DialogTitle>
-      <List sx={{ pt: 0 }}>
-        {selectedValue.map((x, i) => (
-          <ListItem button key={i}>
-            <ListItemAvatar>
-              <Avatar sx={{ bgcolor: "white", color: blue[600] }}>
-                <ArrowRightIcon />
-              </Avatar>
-            </ListItemAvatar>
-            <ListItemText primary={x} />
-          </ListItem>
-        ))}
-        {remarks.length > 0 && (
-          <>
-            <DialogTitle sx={{ fontSize: 3 }}>REMARKS</DialogTitle>
-            <ListItem button>
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: "white", color: blue[600] }}>
-                  <ArrowRightIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={remarks} />
-            </ListItem>
-          </>
-        )}
-      </List>
-    </Dialog>
-  );
-}
-
-SimpleDialog.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  selectedValue: PropTypes.string.isRequired,
-  remarks: PropTypes.string.isRequired,
-};
-
-class History extends React.Component {
-  state = {
-    rows: [],
-    open: false,
-    remarks: "",
-    selectedValue: [],
-    checkBox: [],
-    columns: [
-      { field: "staff", headerName: "Staff Name", width: 230 },
-      { field: "itemName", headerName: "ITEMS", width: 380 },
-      { field: "assignedBy", headerName: "Assigned By", width: 230 },
-      {
-        field: "date",
-        headerName: "Date",
-        type: "number",
-        width: 130,
-        valueGetter: (params) => `${params.row.date.substr(0, 16)}`,
-      },
-    ],
-  };
-
-  componentDidMount() {
-    this.props.fetchHistory();
-    let tmp = [...this.props?.history];
-    let newArr = [];
-    tmp?.map((x, i) => {
-      x.id = i;
-      x?.itemName.map((y, index) => {
-        if (typeof y === "object") {
-          newArr.push(y.title);
-          x.itemName = newArr;
-        }
+        delete x.biometric;
+        delete x.signature;
+        delete x.unit
+        x.items.map((y, index) => {
+          newArr.push({ ...x, ['title']: y.title, ['invNumber']: y.invNumber, ['assignedBy']: y.assignedBy, ['gems']: y.gems, ['verified']: y.verified, ['date']: y.date, ['pending']: y.pending })
+        });
       });
-    });
-    tmp = tmp.filter((item) => item.pending === true);
-    this.setState({ rows: tmp });
-  }
-  // componentWillUnmount() {
+      newArr.map((x, i) => {
+        delete x.items
+        delete x.__v
+      })
+      let nowArr = newArr.filter((item) => item.pending === true);
+      setRows(nowArr)
+    }
+    if (rows.length === 0) {
+      CleanData()
+      setOpen(true)
+    } else {
+      setOpen(false)
+    }
+  }, [data, rows])
 
-  // }
 
-  handleRowClick = (e) => {
-    this.setState({ remarks: e.row.remarks, selectedValue: e.row.itemName });
+
+  const handleRowClick = async (e) => {
+
   };
 
-  handleClose = (value) => {
-    this.setState({ open: false, selectedValue: value });
+  const handleSelectionRemove = (e) => {
+    setCheckBox(e)
   };
-
-  handleOpen = () => {
-    this.setState({ open: true });
-  };
-
-  handleSelectionRemove = (e) => {
-    this.setState({ checkBox: e });
-  };
-  handleModal = () => {
-    this.props.setLoad(false);
+  const handleModal = () => {
+    setOpen(false);
   };
   //btn click
-  handleClick = () => {
-    let tmp = [...this.state.rows];
+  const handleClick = async () => {
+    setOpen(true)
+    let tmp = [...rows];
     let arrId = [];
-    this.state.checkBox.map((x, i) => {
-      arrId.push(this.props.history[x]._id);
-      tmp = tmp.filter((item) => !this.state.checkBox.includes(item.id));
+    checkBox.map((x, i) => {
+      arrId.push(rows[x]);
+      tmp = tmp.filter((item) => !checkBox.includes(item.id));
     });
-    this.props.fetchUpdate(arrId, this.props.user.name);
-    this.setState({ rows: tmp });
-    this.props.setRow(tmp);
-    this.setState({ checkBox: [] });
-    this.props.setLoad(false);
+    await props.fetchUpdate(arrId, props.user.name);
+    setRows(tmp)
+    setCheckBox([])
+    setOpen(false)
   };
-  render() {
-    return (
-      <Box>
-        <Modal handleClose={this.handleModal} loader={this.props.loader} />
+  return (
+    <Box>
+      <Modal handleClose={handleModal} loader={open} />
 
-        <div className="tableBox" style={{ height: 400 }}>
-          <DataGrid
-            sx={{ width: "75rem" }}
-            rows={this.state.rows}
-            columns={this.state.columns}
-            pageSize={10}
-            rowsPerPageOptions={[10]}
-            checkboxSelection
-            onSelectionModelChange={this.handleSelectionRemove}
-            onRowClick={this.handleRowClick}
-            onRowDoubleClick={this.handleOpen}
-          />
-          <SimpleDialog
-            open={this.state.open}
-            selectedValue={this.state.selectedValue}
-            onClose={this.handleClose}
-            remarks={this.state.remarks}
-          />
-        </div>
-        <div>
-          <Button
-            onClick={this.handleClick}
-            disabled={this.state.checkBox.length === 0 ? true : false}
-            sx={{ mt: 3, ml: 9 }}
-            variant="contained"
-            color="success"
-          >
-            Recieved
-          </Button>
-        </div>
-      </Box>
-    );
-  }
+      <div className="tableBox" style={{ height: 400 }}>
+        <DataGrid
+          sx={{ width: "75rem" }}
+          rows={rows}
+          columns={columns}
+          pageSize={10}
+          rowsPerPageOptions={[10]}
+          checkboxSelection
+          onSelectionModelChange={handleSelectionRemove}
+          onRowClick={handleRowClick}
+        />
+      </div>
+      <div>
+        <Button
+          onClick={handleClick}
+          disabled={checkBox.length === 0 ? true : false}
+          sx={{ mt: 3, ml: 9 }}
+          variant="contained"
+          color="success"
+        >
+          Recieved
+        </Button>
+      </div>
+    </Box>
+  );
+
 }
-
 const mapStateToProps = (state) => {
   return {
     loader: state.loader,
-    history: state.history,
     user: state.fetchData,
   };
 };

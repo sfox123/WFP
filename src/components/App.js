@@ -6,10 +6,11 @@ import Staff from "./views/Staff";
 
 import Protected from "../routes/Protected";
 
-import { BrowserRouter, Route, Redirect, Routes } from "react-router-dom";
+import { BrowserRouter, Route } from "react-router-dom";
 import { connect } from "react-redux";
 import { getHistory } from "../actions";
 import Signature from "./views/Signature";
+import SignMail from './views/SignMail'
 
 const App = ({ fetchHistory }) => {
   useEffect(() => {
@@ -23,9 +24,8 @@ const App = ({ fetchHistory }) => {
           <Route exact path={"/"} component={Login} />
           <Route exact path={"/Login"} component={Login} />
           <Route exact path={"/:userId/details/:query"} component={Staff} />
-          <Route exact path={"/:id/assign/:el"} component={Signature} />
-          <Route exact path={"/mail/:id"} component={Signature} />
-          <Route exact path={"/:id/creation"} component={Signature} />
+          <Route path={"/:id/assign"} component={SignMail} />
+          <Route path={"/mail/:id"} component={Signature} />
           <Protected exact path={"/User"} component={User} />
         </div>
       </BrowserRouter>

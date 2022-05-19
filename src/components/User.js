@@ -167,18 +167,18 @@ const User = ({ loader, handleToggle, handleAlert }) => {
             {selectIndex === 0
               ? "Item Assignment"
               : selectIndex === 1
-              ? "Add New Staff"
-              : selectIndex === 2
-              ? "Pending Items"
-              : selectIndex === 3
-              ? "Recieved Items"
-              : selectIndex === 4
-              ? "User Settings"
-              : null}
+                ? "Add New Staff"
+                : selectIndex === 2
+                  ? "Pending Items"
+                  : selectIndex === 3
+                    ? "Recieved Items"
+                    : selectIndex === 4
+                      ? "User Settings"
+                      : null}
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ ml: "auto" }}>
-            <IconButton
+            {/* <IconButton
               onClick={() => {
                 setSearchOpen(true);
               }}
@@ -188,7 +188,7 @@ const User = ({ loader, handleToggle, handleAlert }) => {
               color="inherit"
             >
               <SearchIcon />
-            </IconButton>
+            </IconButton> */}
             <IconButton
               onClick={handleCart}
               sx={{ mr: 3 }}

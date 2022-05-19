@@ -93,7 +93,7 @@ const Search = ({ openSearch, setOpen }) => {
       </MaterialSearch>
       <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
         <MenuList>
-          {hits.map((hit, i) => (
+          {hits?.map((hit, i) => (
             <div key={i}>
               <Link
                 style={{ textDecoration: "none", color: "inherit" }}
@@ -108,7 +108,7 @@ const Search = ({ openSearch, setOpen }) => {
                   }}
                 >
                   {currentRefinement.length > 0 &&
-                    hit._highlightResult.name.matchedWords.length > 0 && (
+                    hit?._highlightResult.name.matchedWords.length > 0 && (
                       <Highlight attribute={`name`} hit={hit} />
                     )}
 

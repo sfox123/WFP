@@ -13,10 +13,11 @@ import Nav from "./Nav";
 import Button from "@mui/material/Button";
 //REDUX
 import { connect } from "react-redux";
+import Modal from './Modal';
 import Snack from "../components/Snack";
 import { loggedUser, loggedUserPass, fetchApi, passError } from "../actions";
 
-const Login = ({ user, handleName, handleSnack, handlePass, login }) => {
+const Login = ({ user, handleName, handlePass, login }) => {
   const [value, setValue] = React.useState("");
 
   const [values, setValues] = React.useState({
@@ -26,7 +27,11 @@ const Login = ({ user, handleName, handleSnack, handlePass, login }) => {
     weightRange: "",
     showPassword: false,
   });
+  const [open, setOpen] = React.useState(false);
 
+  const handleClose = () => {
+    setOpen(false);
+  }
   const handleChange = (event) => {
     setValue(event.target.value);
   };
@@ -37,6 +42,10 @@ const Login = ({ user, handleName, handleSnack, handlePass, login }) => {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+  const handleClick = async () => {
+    setOpen(true);
+    await login();
+  }
 
   const handleClickShowPassword = () => {
     setValues({
@@ -49,6 +58,7 @@ const Login = ({ user, handleName, handleSnack, handlePass, login }) => {
     <>
       <Nav />
       <Box className="loginBox">
+        <Modal handleClose={handleClose} loader={open} />
         <Snack />
         <FormControl sx={{ m: 1, width: "25ch", mb: 3 }}>
           <InputLabel id="demo-simple-select-label">USER</InputLabel>
@@ -95,7 +105,7 @@ const Login = ({ user, handleName, handleSnack, handlePass, login }) => {
           />
         </FormControl>
 
-        <Button onClick={login} variant="contained">
+        <Button onClick={handleClick} variant="contained">
           LOGIN
         </Button>
       </Box>
@@ -111,5 +121,4 @@ export default connect(mapStateToProps, {
   handleName: loggedUser,
   handlePass: loggedUserPass,
   login: fetchApi,
-  handleSnack: passError,
 })(Login);

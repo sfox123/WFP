@@ -24,15 +24,18 @@ import { blue } from "@mui/material/colors";
 import { connect } from "react-redux";
 import { handleAlert, matchScore } from "../actions";
 import Modal from "./Modal";
-import { vMail } from '../actions/mail';
-import db from "../api/db.json";
+import { sMail } from '../actions/mail';
+
+import axios from "../api/axios";
 
 const Alert = (props) => {
   const [open, setOpen] = React.useState(false);
   const [mail, setMail] = React.useState(false);
+  const [data, setData] = React.useState([])
   const [user, setUser] = React.useState('');
   const [submit, setSubmit] = React.useState(true)
-  const { handleAlert, alertOpen, list, setCart, fetchFP } =
+  const { handleAlert, alertOpen, list, setCart, fetchFP, history, fetchData
+  } =
     props;
 
   const handleClose = () => {
@@ -59,7 +62,19 @@ const Alert = (props) => {
     setOpen(true);
     setCart([]);
   };
+  const handleSignMail = async () => {
+    //send the item verified false
+    setOpen(true);
+    let userName = user.split('@')[0]
+    const response = await axios.post('/wfp/postMailOnly', { user: userName, list, assignedBy: fetchData.name });
+    setCart([]);
+    setOpen(false);
+    handleClose()
+    console.log(response.data)
+    sMail(response.data);
+  }
 
+  const tmp = history.filter((item) => item.signature != null)
 
   return ReactDOM.createPortal(
     <>
@@ -112,7 +127,9 @@ const Alert = (props) => {
                       }
                     }}
                     freeSolo
-                    options={db.EMAIL.map((option) => option)}
+                    options={tmp?.map((option) =>
+                      `${option.name}@wfp.org`
+                    )}
                     renderInput={(params) => (
                       <TextField {...params} label="MAIL LIST" key={"1"} />
                     )}
@@ -147,7 +164,7 @@ const Alert = (props) => {
               </IconButton>)}
               {mail && (<IconButton
                 className=""
-                onClick={() => vMail(user, list)}
+                onClick={handleSignMail}
                 aria-label="addCart"
                 disabled={submit}
                 color="success"
