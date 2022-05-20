@@ -74,7 +74,7 @@ const Alert = (props) => {
     sMail(response.data);
   }
 
-  const tmp = history.filter((item) => item.signature != null)
+  const tmp = history?.filter((item) => item.name != null)
 
   return ReactDOM.createPortal(
     <>

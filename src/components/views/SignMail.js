@@ -109,7 +109,27 @@ const SignMail = ({ toggleLoader, toggleSnack }) => {
         }
 
     }
+    const saveCurrentCanvas = async () => {
+        try {
+            setOpen(true);
+            setImageData(signCanvas.current.getTrimmedCanvas().toDataURL("image/png"))
+            let img = signCanvas.current.getTrimmedCanvas().toDataURL("image/png");
+            console.log(imageData)
+            const response = await axios.post('/wfp/setImageAndVerify', { id, img });
+            signClear();
+            const SNACK = {
+                snackOpen: true,
+                snackMessage: response.data,
+                severity: true,
+            };
+            toggleSnack(SNACK);
+            setOpen(false);
+            window.location.reload()
+        } catch (error) {
+            console.error(error)
+        }
 
+    }
     return (
         <>
             <Box sx={{ width: '100%' }}>
@@ -123,27 +143,57 @@ const SignMail = ({ toggleLoader, toggleSnack }) => {
                         <Tab label="E-Signature" {...a11yProps(0)} />
                     </Tabs>
                 </Box>
-                <TabPanel value={value} index={0}>
-                    <Typography variant="h6" sx={{ mb: 5 }} gutterBottom component="div">
-                        USER - {data?.name}
-                    </Typography>
-                    <Typography variant="p" gutterBottom component="div">
-                        Use This Signature
-                    </Typography>
-                    <Box display={'flex'} flexDirection="column">
-                        <img src={data?.signature} width='25%' />
-                    </Box>
-                    <br />
-                    {/* <Button sx={{ mt: 1 }} onClick={signClear} variant='contained' color='warning'>Try Again</Button> */}
+                {data?.biometric === null &&
+                    <TabPanel value={value} index={0}>
+                        <Typography variant="h6" sx={{ mb: 5 }} gutterBottom component="div">
+                            USER - {data?.name}
+                        </Typography>
+                        <Typography variant="p" gutterBottom component="div">
+                            Use This Signature
+                        </Typography>
+                        {data?.fingerprint === null &&
+                            <>
+                                <Box display={'flex'} flexDirection="column">
+                                    <img src={data?.signature} width='25%' />
+                                </Box>
+                                <Button sx={{ mt: 1, ml: 5 }} onClick={saveCanvas} variant='contained' color='success'>Submit</Button>
+                            </>
+                        }
+                    </TabPanel>}
+                <br />
+                {data?.biometric != null &&
+                    <TabPanel value={value} index={0}>
+                        <Typography variant="h6" sx={{ mb: 5 }} gutterBottom component="div">
+                            USER - {data?.name}
+                        </Typography>
+                        <Typography variant="h6" sx={{ mb: 5 }} gutterBottom component="div">
+                            Items -
+                            <ul>
+                                {data?.items.map((x, i) => (
 
-                    <Button sx={{ mt: 1, ml: 5 }} onClick={saveCanvas} variant='contained' color='success'>Submit</Button>
-                </TabPanel>
-                <TabPanel value={value} index={1}>
+                                    !x.verified && <li>{x.title} - {x.invNumber}</li>
+                                ))}
+                            </ul>
+                        </Typography>
+                        <Typography variant="p" gutterBottom component="div">
+                            Draw Below
+                        </Typography>
+                        <Box display={'flex'} flexDirection="column">
+                            <SignaturePad ref={signCanvas} canvasProps={{ className: 'canvas' }} />
+                        </Box>
+                        <br />
+                        <Button sx={{ mt: 1 }} onClick={signClear} variant='contained' color='warning'>Try Again</Button>
+
+                        <Button sx={{ mt: 1, ml: 5 }} onClick={saveCurrentCanvas} variant='contained' color='success'>Submit</Button>
+                    </TabPanel>
+                }
+                {/* <Button sx={{ mt: 1 }} onClick={signClear} variant='contained' color='warning'>Try Again</Button> */}
+                {/* <TabPanel value={value} index={1}>
                     Item Two
                 </TabPanel>
                 <TabPanel value={value} index={2}>
                     Item Three
-                </TabPanel>
+                </TabPanel> */}
             </Box>
 
         </>
