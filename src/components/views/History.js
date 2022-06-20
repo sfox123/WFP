@@ -32,28 +32,8 @@ const History = (props) => {
 
   useEffect(() => {
     async function CleanData() {
-      const response = await axios.get('/wfp/getHistory');
-      let subArr = response.data;
-      subArr.reverse();
-      setData(subArr);
-      let tmp = [...data];
-      let newArr = [];
-      tmp.map((x, i) => {
-        x.id = i;
-
-        delete x.biometric;
-        delete x.signature;
-        delete x.unit
-        x.items.map((y, index) => {
-          newArr.push({ ...x, ['title']: y.title, ['invNumber']: y.invNumber, ['assignedBy']: y.assignedBy, ['gems']: y.gems, ['verified']: y.verified, ['date']: y.date, ['pending']: y.pending })
-        });
-      });
-      newArr.map((x, i) => {
-        delete x.items
-        delete x.__v
-      })
-      let nowArr = newArr.filter((item) => item.pending === true);
-      setRows(nowArr)
+      const {data} = await axios.get('/wfp/tableNew');
+      setRows(data);
     }
     if (rows.length === 0) {
       CleanData()
@@ -61,7 +41,7 @@ const History = (props) => {
     } else {
       setOpen(false)
     }
-  }, [data, rows])
+  }, [rows])
 
   const handleSelectionRemove = (e) => {
     setCheckBox(e)
@@ -75,7 +55,6 @@ const History = (props) => {
     let tmp = [...rows];
     let arrId = [];
     checkBox.map((x, i) => {
-      // console.log(x);
       arrId.push(rows[x]);
       tmp = tmp.filter((item) => !checkBox.includes(item.id));
     });

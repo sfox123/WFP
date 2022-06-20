@@ -43,39 +43,8 @@ const History = (props) => {
 
   useEffect(() => {
     async function CleanData() {
-      const response = await axios.get('/wfp/getHistory');
-      setData(response.data);
-      let tmp = [...data];
-      tmp.reverse()
-      let newArr = [];
-      tmp.map((x, i) => {
-        x.id = i;
-
-        delete x.biometric;
-        delete x.signature;
-        delete x.unit
-        x.items.map((y, index) => {
-          if (y.pending === false) {
-            newArr.push({
-              ...x, ['title']: y.title,
-              ['invNumber']: y.invNumber,
-              ['assignedBy']: y.assignedBy,
-              ['gems']: y.gems,
-              ['verified']: y.verified,
-              ['date']: y.date,
-              ['pending']: y.pending,
-              ['recievedDate']: y.recievedDate,
-              ['recievedBy']: y.recievedBy
-            })
-          }
-        });
-      });
-      newArr.map((x, i) => {
-        delete x.items
-        delete x.__v
-      })
-      let nowArr = newArr.filter((item) => item.pending === false);
-      setRows(nowArr)
+      const {data} = await axios.get('/wfp/tableLegend');
+      setRows(data)
     }
     if (rows.length === 0) {
       CleanData()
@@ -83,7 +52,7 @@ const History = (props) => {
     } else {
       setOpen(false)
     }
-  }, [data, rows])
+  }, [rows])
 
 
 
