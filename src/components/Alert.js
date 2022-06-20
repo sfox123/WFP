@@ -14,27 +14,33 @@ import SendIcon from '@mui/icons-material/Send';
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
 import PersonIcon from "@mui/icons-material/Person";
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import AttachEmailIcon from "@mui/icons-material/AttachEmail";
 import IconButton from "@mui/material/IconButton";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Fingerprint from "@mui/icons-material/Fingerprint";
-
+import Checkbox from '@mui/material/Checkbox';
 import DeleteIcon from "@mui/icons-material/Delete";
 import { blue } from "@mui/material/colors";
 //react
 import { connect } from "react-redux";
-import { handleAlert, matchScore } from "../actions";
+import { handleAlert, matchScore, createUser, createUserMail } from "../actions";
 import Modal from "./Modal";
 import { sMail } from '../actions/mail';
 
 import axios from "../api/axios";
+import NewUser from './views/NewUser';
 
 const Alert = (props) => {
   const [open, setOpen] = React.useState(false);
   const [mail, setMail] = React.useState(false);
-  const [data, setData] = React.useState([])
+  const [newUser, setNewUser] = React.useState(false);
   const [user, setUser] = React.useState('');
+  const [name, setName] = React.useState(null);
+  const [cat, setCat] = React.useState(null);
   const [submit, setSubmit] = React.useState(true)
-  const { handleAlert, alertOpen, list, setCart, fetchFP, history, fetchData
+  const { handleAlert, alertOpen, list, setCart, fetchFP, history, fetchData, createUser, createUserMail
   } =
     props;
 
@@ -56,12 +62,58 @@ const Alert = (props) => {
   const handleModal = () => {
     setOpen(false);
   };
-  const handleBio = () => {
-    fetchFP(list);
-    handleAlert(false);
-    setOpen(true);
-    setCart([]);
-  };
+  const handleBio = async () => {
+    if (newUser) {
+      handleAlert(false);
+      setOpen(true);
+      await createUser({ userName: name, userUnit: cat, list })
+      setCart([]);
+      setOpen(false);
+      setName(null);
+      setCat(null)
+    } else {
+      fetchFP(list);
+      handleAlert(false);
+      setOpen(true);
+      setCart([]);
+    };
+  }
+  //deciding wether it should work or not
+  const masterBlaster = (e) => {
+    switch (e) {
+      case 1:
+        if (newUser && name && cat)
+          return false;
+        else if (!newUser)
+          return false;
+        else
+          return true;
+      case 2:
+        if (newUser)
+          return false;
+        else if (mail)
+          return false;
+        else
+          return true
+      case 3:
+        if (mail)
+          return true;
+        else if (newUser)
+          return true;
+        else
+          return false;
+      case 4:
+        if (user)
+          return false;
+        else if (newUser && name && cat)
+          return false;
+        else
+          return true
+      default:
+        return true;
+    }
+  }
+
   const handleSignMail = async () => {
     //send the item verified false
     setOpen(true);
@@ -70,14 +122,25 @@ const Alert = (props) => {
     setCart([]);
     setOpen(false);
     handleClose()
-    console.log(response.data)
-    sMail(response.data);
+    sMail(response.data, list);
+  }
+  const handleSignMailNew = async () => {
+    // send the item verified false
+    setOpen(true);
+    // let userName = user.split('@')[0]
+    const response = await axios.post('/wfp/getMail', { name, list, assignedBy: fetchData.name, cat });
+    // console.log(name, cat, user)
+    setCart([]);
+    setOpen(false);
+    handleClose()
+    sMail(response.data, list);
   }
 
   const tmp = history?.filter((item) => item.name != null)
 
   return ReactDOM.createPortal(
     <>
+      <Modal handleClose={handleModal} loader={open} />
       {!mail && list.length === 0 && (
         <Dialog onClose={handleClose} open={alertOpen}>
           <DialogTitle>Bucket is Empty</DialogTitle>
@@ -86,7 +149,6 @@ const Alert = (props) => {
 
       {list.length > 0 && (
         <Dialog onClose={handleClose} open={alertOpen}>
-          <Modal handleClose={handleModal} loader={open} />
           <DialogTitle>Bucket Items</DialogTitle>
           <List sx={{ pt: 0 }}>
             {list.length > 0 &&
@@ -136,8 +198,13 @@ const Alert = (props) => {
                   />
                 </Stack>
               </FormControl>
-
             )}
+            {!mail && <ListItem>
+              <FormGroup>
+                <FormControlLabel checked={newUser} onClick={(e) => setNewUser(e.target.checked)} control={<Checkbox />} label="New User" />
+                {newUser && <NewUser userName={name} setUserName={setName} cat={cat} setCat={setCat} />}
+              </FormGroup>
+            </ListItem>}
             <ListItem
               div
               sx={{
@@ -146,15 +213,25 @@ const Alert = (props) => {
                 justifyContent: "space-around",
               }}
             >
-              <IconButton
+              {!mail && <IconButton
                 className="svg_icons"
                 aria-label="addCart"
                 color="success"
+                disabled={masterBlaster(1)}
                 onClick={handleBio}
               >
                 <Fingerprint />
-              </IconButton>
-              {!mail && (<IconButton
+              </IconButton>}
+              {mail && <IconButton
+                className="svg_icons"
+                aria-label="addCart"
+                color="success"
+                disabled={masterBlaster(1)}
+                onClick={() => setMail(false)}
+              >
+                <ArrowBackIcon />
+              </IconButton>}
+              {masterBlaster(2) && (<IconButton
                 className=""
                 aria-label="addCart"
                 color="success"
@@ -166,11 +243,21 @@ const Alert = (props) => {
                 className=""
                 onClick={handleSignMail}
                 aria-label="addCart"
-                disabled={submit}
+                disabled={masterBlaster(4)}
                 color="success"
 
               >
-                <SendIcon fontSize="large" color='primary' />
+                <SendIcon fontSize="large" color='success' />
+              </IconButton>)}
+              {newUser && (<IconButton
+                className=""
+                onClick={handleSignMailNew}
+                aria-label="addCart"
+                disabled={masterBlaster(4)}
+                color="success"
+
+              >
+                <SendIcon fontSize="large" color='success' />
               </IconButton>)}
             </ListItem>
           </List>
@@ -183,4 +270,4 @@ const Alert = (props) => {
 const mapStateToProps = (state) => {
   return state;
 };
-export default connect(mapStateToProps, { handleAlert, fetchFP: matchScore })(Alert);
+export default connect(mapStateToProps, { handleAlert, fetchFP: matchScore, createUser, createUserMail })(Alert);

@@ -1,5 +1,4 @@
 import * as React from "react";
-// import { connectSearchBox } from "react-instantsearch-dom";
 import { styled, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
@@ -12,7 +11,6 @@ import Typography from "@mui/material/Typography";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import MenuIcon from "@mui/icons-material/Menu";
 import CategoryIcon from "@mui/icons-material/Category";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -23,12 +21,10 @@ import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import Button from "@mui/material/Button";
 import PendingIcon from "@mui/icons-material/Pending";
-import SearchIcon from "@mui/icons-material/Search";
 import PersonIcon from "@mui/icons-material/Person";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
 import { toggleLoader, toggleSnack, handleAlert, matchScore } from "../actions";
-import NewUser from "./views/NewUser";
 import History from "./views/History";
 import Assign from "./views/Assign";
 import Legend from "./views/Legend";
@@ -229,7 +225,6 @@ const User = ({ loader, handleToggle, handleAlert }) => {
         <List>
           {[
             "Item Assignment",
-            "Add New Staff",
             "Pending Items",
             "Recieved Items",
           ].map((text, index) => (
@@ -244,9 +239,8 @@ const User = ({ loader, handleToggle, handleAlert }) => {
             >
               <ListItemIcon>
                 {index === 0 && <InboxIcon />}
-                {index === 1 && <PersonAddAltIcon />}
-                {index === 2 && <PendingIcon />}
-                {index === 3 && <CategoryIcon />}
+                {index === 1 && <PendingIcon />}
+                {index === 2 && <CategoryIcon />}
               </ListItemIcon>
               <ListItemText primary={text} />
             </ListItem>
@@ -255,9 +249,8 @@ const User = ({ loader, handleToggle, handleAlert }) => {
         <Divider />
       </Drawer>
       {selectIndex === 0 && <Assign cart={cart} setCart={setCart} />}
-      {selectIndex === 1 && <NewUser />}
-      {selectIndex === 2 && <History />}
-      {selectIndex === 3 && <Legend />}
+      {selectIndex === 1 && <History />}
+      {selectIndex === 2 && <Legend />}
       {selectIndex === 4 && <Settings />}
       <Alert list={cart} setCart={setCart} />
     </Box>

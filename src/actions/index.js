@@ -75,6 +75,7 @@ export const fetchBio = () => async (dispatch, getState) => {
       type: "FETCH_BIO",
       payload: response.data.TemplateBase64,
     });
+
   } catch (error) {
     dispatch(passError(true));
     console.log(error);
@@ -83,13 +84,15 @@ export const fetchBio = () => async (dispatch, getState) => {
 export const createUser = (state) => async (dispatch, getState) => {
   try {
     await dispatch(fetchBio());
-    const { userName, userUnit } = state;
+    const { userName, userUnit, list } = state;
     const bioMetric = getState().bioMetric;
-
+    let assignedBy = getState().fetchData.name;
     const response = await axios.post("/wfp/getBioMetric", {
       userName,
       userUnit,
       bioMetric,
+      assignedBy,
+      list
     });
     if (response.status === 200) {
       const SNACK = {
@@ -107,10 +110,13 @@ export const createUser = (state) => async (dispatch, getState) => {
 export const createUserMail = (state) => async (dispatch, getState) => {
   try {
     dispatch(toggleLoader(true));
-    const { userName, userUnit } = state;
+    const { userName, userUnit, list } = state;
+    let assignedBy = getState().fetchData.name;
     const response = await axios.post("/wfp/getMail", {
       userName,
       userUnit,
+      assignedBy,
+      list
     });
     if (response.status === 200) {
       const SNACK = {
